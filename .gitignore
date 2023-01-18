@@ -1,0 +1,13 @@
+node_modules
+coverage
+*.log
+dist
+.cache
+lib
+build
+!src/*
+!test/*
+.idea
+.DS_Store
+.vscode
+.vscode/*
