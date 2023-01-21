@@ -381,8 +381,13 @@ export default class Mesh {
   public get defaultBuffers(): GeometryBuffers {
     return this._defaultBuffers;
   }
+
   public set defaultBuffers(value: GeometryBuffers) {
     this._defaultBuffers = value;
+  }
+
+  public get extraBuffers(): Map<string, TypedArray> {
+    return this._extraBuffers;
   }
 
   public get faces(): Face[] {

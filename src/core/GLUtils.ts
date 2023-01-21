@@ -110,3 +110,19 @@ export const storeFace = (
 export const waitRAF = () => {
   return new Promise((resolve) => requestAnimationFrame(resolve));
 };
+
+export const flattenFloatArray = (arr: Float32Array[]) => {
+  let totalLength = 0;
+  for (let i = 0; i < arr.length; i++) {
+    totalLength += arr[i].length;
+  }
+
+  const result = new Float32Array(totalLength);
+  let offset = 0;
+  for (let i = 0; i < arr.length; i++) {
+    result.set(arr[i], offset);
+    offset += arr[i].length;
+  }
+
+  return result;
+};

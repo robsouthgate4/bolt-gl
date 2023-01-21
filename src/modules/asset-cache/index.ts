@@ -4,7 +4,15 @@ import pMap from "p-map";
 
 import parseHdr from "../hdr-parse";
 import GLTFLoader from "../gltf-loader";
-import { Bolt, FLOAT, RGBA, RGBA16F, Texture2D, TextureCube } from "../../";
+import {
+  Bolt,
+  DrawSet,
+  FLOAT,
+  RGBA,
+  RGBA16F,
+  Texture2D,
+  TextureCube,
+} from "bolt-gl";
 
 interface QueueItem {
   url: string;
@@ -28,10 +36,11 @@ export default class AssetCache {
   private _cacheObj: {} = {};
   // eslint-disable-next-line @typescript-eslint/ban-types
   private _onProgressListeners: Function[] = [];
-  private _asyncConcurrency = 1;
+  private _asyncConcurrency = 5;
   private _logs: any[] = [];
   private _debug = false;
   private _bolt = Bolt.getInstance();
+  private _gltfLoader: GLTFLoader;
 
   static getInstance() {
     if (!AssetCache._instance) AssetCache._instance = new AssetCache();
@@ -50,6 +59,7 @@ export default class AssetCache {
         });
       });
     }
+    this._gltfLoader = new GLTFLoader(this._bolt, false);
   }
 
   addProgressListener(fn) {
@@ -195,10 +205,8 @@ export default class AssetCache {
 
     switch (type) {
       case AssetType.GLTF:
-        const gltfLoader = new GLTFLoader(this._bolt, false);
-        const gltfNode = await gltfLoader.load(url);
-        return gltfNode;
-
+        const gltfNode = await this._gltfLoader.load(url);
+        return { scene: gltfNode, loader: this._gltfLoader };
       case AssetType.TEXTURE:
         const texture = new Texture2D({
           imagePath: url,

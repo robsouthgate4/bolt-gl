@@ -23,6 +23,19 @@ out vec3 WorldPosition;
 out vec3 Eye;
 out vec3 WorldNormal;
 
+uniform sampler2D jointTexture;
+uniform mat4 jointTransforms[128];
+uniform float jointCount;
+
+
+mat4 getBoneMatrix(int jointNdx) {
+  return mat4(
+    texelFetch(jointTexture, ivec2(0, jointNdx), 0),
+    texelFetch(jointTexture, ivec2(1, jointNdx), 0),
+    texelFetch(jointTexture, ivec2(2, jointNdx), 0),
+    texelFetch(jointTexture, ivec2(3, jointNdx), 0));
+}
+
 
 void main() {
 
@@ -33,13 +46,22 @@ void main() {
 	// get the world space normal
     Normal						= ( normal * vec4( aNormal, 0.0 ) ).xyz;
     ViewPosition				= viewSpacePosition.xyz;
-	WorldPosition				= worldSpacePosition.xyz;
+		WorldPosition				= worldSpacePosition.xyz;
 
 	vec4 eyeDirViewSpace	= viewSpacePosition - vec4( 0, 0, 0, 1 );
 	Eye				= normalize( cameraPosition - worldSpacePosition.xyz );
 	WorldNormal				= ( model * vec4( Normal, 0.0 ) ).xyz;
 
-    gl_Position				= projection * modelView * vec4( aPosition, 1.0 );
+	mat4 skinMatrix = mat4(1.0);
+
+  skinMatrix =  getBoneMatrix(int(aJoints.x)) * aWeights.x +
+                  getBoneMatrix(int(aJoints.y)) * aWeights.y +
+                  getBoneMatrix(int(aJoints.z)) * aWeights.z +
+                  getBoneMatrix(int(aJoints.w)) * aWeights.w;
+
+	mat4 combinedModelView = skinMatrix * model;
+
+  gl_Position				= projection * view * combinedModel  * vec4( aPosition, 1.0 );
 
 	Uv			= aUv;
 }

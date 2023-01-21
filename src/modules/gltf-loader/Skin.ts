@@ -1,5 +1,4 @@
-import { mat4 } from "gl-matrix";
-
+import { flattenFloatArray } from "../../core/GLUtils";
 import {
   CLAMP_TO_EDGE,
   FLOAT,
@@ -9,6 +8,7 @@ import {
   RGBA32f,
   Texture2D,
 } from "../../";
+import { mat4 } from "gl-matrix";
 
 export default class Skin {
   private _joints: Node[];
@@ -45,23 +45,28 @@ export default class Skin {
       );
     }
 
+    const w = 4;
+    const h = this._joints.length;
+
     this._jointTexture = new Texture2D({
-      width: 4,
-      height: this._joints.length,
-      format: RGBA,
+      width: w,
+      height: h,
       internalFormat: RGBA32f,
+      format: RGBA,
       wrapS: CLAMP_TO_EDGE,
       wrapT: CLAMP_TO_EDGE,
       minFilter: NEAREST,
       magFilter: NEAREST,
       type: FLOAT,
       generateMipmaps: false,
+      flipY: false,
     });
+
+    this._jointTexture.name = "jointTexture";
   }
 
   update(node: Node) {
-    const globalInverse = mat4.create();
-    mat4.invert(globalInverse, node.worldMatrix);
+    mat4.invert(this._globalWorldInverse, node.worldMatrix);
 
     // apply inverse bind matrix to each joint
 
@@ -70,11 +75,19 @@ export default class Skin {
 
       const dst = this._jointMatrices[i];
 
-      mat4.multiply(dst, globalInverse, joint.modelMatrix);
+      mat4.multiply(dst, this._globalWorldInverse, joint.modelMatrix);
       mat4.multiply(dst, dst, this._inverseBindMatrices[i]);
     }
 
-    //    this._jointTexture.setFromData(this._jointData, 4, this._joints.length);
+    this._jointTexture.setFromData(
+      flattenFloatArray(this._jointMatrices),
+      4,
+      this._joints.length
+    );
+  }
+
+  public get jointData(): Float32Array {
+    return this._jointData;
   }
 
   public get jointTexture(): Texture2D {
@@ -99,9 +112,5 @@ export default class Skin {
 
   public set jointMatrices(value: Float32Array[]) {
     this._jointMatrices = value;
-  }
-
-  public get jointData(): Float32Array {
-    return this._jointData;
   }
 }

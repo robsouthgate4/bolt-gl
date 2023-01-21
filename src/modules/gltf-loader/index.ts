@@ -21,7 +21,7 @@ import {
   UNSIGNED_SHORT,
   INT,
   UNSIGNED_INT,
-} from "../../";
+} from "bolt-gl";
 
 import SkinMesh from "./SkinMesh";
 import Skin from "./Skin";
@@ -29,9 +29,7 @@ import skinVertexShader from "./shaders/skin/skin.vert";
 import skinFragmentShader from "./shaders/skin/skin.frag";
 import vertexShader from "./shaders/color/color.vert";
 import fragmentShader from "./shaders/color/color.frag";
-import { DracoDecoder } from "../draco-decoder";
-
-import { quat, vec3 } from "gl-matrix";
+import { DracoDecoder } from "./draco-decoder";
 
 export type TypedArray =
   | Int8ArrayConstructor
@@ -206,20 +204,20 @@ export interface AnimationSampler {
 /**
  * A keyframe animation.
  */
-// export interface Animation {
-//   /**
-//    * An array of channels, each of which targets an animation's sampler at a node's property. Different channels of the same animation can't have equal targets.
-//    */
-//   channels: AnimationChannel[];
-//   /**
-//    * An array of samplers that combines input and output accessors with an interpolation algorithm to define a keyframe graph (but not its target).
-//    */
-//   samplers: AnimationSampler[];
-//   name?: any;
-//   extensions?: any;
-//   extras?: any;
-//   [k: string]: any;
-// }
+export interface GLTFAnimation {
+  /**
+   * An array of channels, each of which targets an animation's sampler at a node's property. Different channels of the same animation can't have equal targets.
+   */
+  channels: AnimationChannel[];
+  /**
+   * An array of samplers that combines input and output accessors with an interpolation algorithm to define a keyframe graph (but not its target).
+   */
+  samplers: AnimationSampler[];
+  name?: any;
+  extensions?: any;
+  extras?: any;
+  [k: string]: any;
+}
 /**
  * Metadata about the glTF asset.
  */
@@ -635,7 +633,7 @@ export interface GLTFSkin {
    * Indices of skeleton nodes, used as joints in this skin.
    */
   joints: GlTfId[];
-  name?: any;
+  name?: string | undefined;
   extensions?: any;
   extras?: any;
   [k: string]: any;
@@ -757,6 +755,11 @@ export interface GLTFTransform {
   scale: KeyFrame[];
 }
 
+export interface GLTFScene {
+  scene: Node;
+  loaded: GLTFLoader;
+}
+
 /**
  * Transform executed at specific time.
  */
@@ -780,8 +783,6 @@ interface Buffer {
 }
 
 export default class GLTFLoader {
-  private _bolt: Bolt;
-
   private _accessorSize: { [key: string]: number } = {
     SCALAR: 1,
     VEC2: 2,
@@ -805,7 +806,7 @@ export default class GLTFLoader {
   private _path!: string;
   private _materials!: Program[];
   private _textures!: Texture2D[];
-  private _root!: Node;
+  private _scene!: Node;
   private _skins!: Skin[];
   private _nodes!: {
     id: number;
@@ -836,7 +837,7 @@ export default class GLTFLoader {
   }
 
   async load(url: string) {
-    const file = url.split("\\").pop()!.split("/").pop() || "";
+    const file = url.split("\\").pop().split("/").pop() || "";
     const path = url.split("/").slice(0, -1).join("/") + "/";
 
     this._path = path;
@@ -854,7 +855,6 @@ export default class GLTFLoader {
       this._json.extensionsRequired.includes("KHR_draco_mesh_compression")
     ) {
       console.log("draco compression detected");
-
       const decoder = new DracoDecoder();
       await decoder.ready();
     }
@@ -868,7 +868,7 @@ export default class GLTFLoader {
 
     // grab buffers
     const buffers = await Promise.all(
-      this._json.buffers!.map(
+      this._json.buffers.map(
         async (buffer) => await this._fetchBuffer(url, buffer as BufferView)
       )
     );
@@ -876,25 +876,25 @@ export default class GLTFLoader {
     this._skinNodes = [];
 
     // arrange nodes with correct transforms
-    this._nodes = this._json.nodes!.map((node, index) =>
+    this._nodes = this._json.nodes.map((node, index) =>
       this._parseNode(index, node)
     );
 
-    // const animations = {} as Animation;
+    this._animations = {} as Animation;
 
-    // this._json.animations &&
-    //   this._json.animations!.forEach((animation: GLTFAnimation) => {
-    //     animations[animation.name as string] = this._parseAnimations(
-    //       animation,
-    //       this._json,
-    //       buffers
-    //     );
-    //   });
+    this._json.animations &&
+      this._json.animations.forEach((animation: GLTFAnimation) => {
+        this._animations[animation.name as string] = this._parseAnimations(
+          animation,
+          this._json,
+          buffers
+        );
+      });
 
     // map textures
     if (this._json.textures !== undefined) {
       this._textures = await Promise.all(
-        this._json.textures!.map(
+        this._json.textures.map(
           async (texture) => await this._parseTexture(this._json, texture)
         )
       );
@@ -902,26 +902,26 @@ export default class GLTFLoader {
 
     // map skins
     if (this._json.skins !== undefined) {
-      this._skins = this._json.skins!.map((skin: GLTFSkin) =>
+      this._skins = this._json.skins.map((skin: GLTFSkin) =>
         this._parseSkin(this._json, skin, buffers)
       );
     }
 
     // map materials
     if (this._json.materials !== undefined) {
-      this._materials = this._json.materials!.map(
+      this._materials = this._json.materials.map(
         (material: Material, index: number) =>
           this._parseMaterials(this._json, material, index)
       );
     }
 
     // map batches
-    this._drawSets = this._json.meshes!.map((mesh, index) =>
+    this._drawSets = this._json.meshes.map((mesh, index) =>
       this._parseDrawSet(this._json, mesh, buffers, index)
     );
 
     // arrange scene graph
-    this._nodes!.forEach((node: GLTFNode, i: number) => {
+    this._nodes.forEach((node: GLTFNode, i: number) => {
       const children = node.children;
 
       if (node.skin !== undefined) {
@@ -938,8 +938,8 @@ export default class GLTFLoader {
         if (node.mesh !== undefined) {
           const b = this._drawSets[node.mesh];
 
-          b.forEach((batch?: DrawSet) => {
-            batch?.setParent(this._nodes[i].node);
+          b.forEach((drawset?: DrawSet) => {
+            drawset?.setParent(this._nodes[i].node);
           });
         }
       }
@@ -954,7 +954,7 @@ export default class GLTFLoader {
       }
     });
 
-    this._skinNodes!.forEach(
+    this._skinNodes.forEach(
       (skinNode: {
         nodeIndex: number;
         skinIndex: number;
@@ -966,79 +966,130 @@ export default class GLTFLoader {
         const nodeIndex = skinNode.nodeIndex;
 
         if (mesh !== undefined) {
-          const b = this._drawSets[mesh];
+          const ds = this._drawSets[mesh];
 
-          if (b !== undefined) {
-            b.forEach((batch?: DrawSet) => {
-              const mesh = batch!.mesh as SkinMesh;
-
+          if (ds !== undefined) {
+            ds.forEach((drawset?: DrawSet) => {
+              const mesh = drawset!.mesh as SkinMesh;
               mesh.skin = skin;
-
-              batch?.setParent(this._nodes[nodeIndex].node);
+              drawset?.setParent(this._nodes[nodeIndex].node);
             });
           }
         }
       }
     );
 
-    this._root = new Node();
+    this._scene = new Node();
 
-    this._json.scenes!.forEach((scene) => {
-      this._root.name = scene.name;
+    this._json.scenes.forEach((scene) => {
+      this._scene.name = scene.name;
+
+      //console.log(scene.nodes[0]);
 
       scene.nodes?.forEach((childNode) => {
         const child = this._nodes[childNode];
-
-        child.node.setParent(this._root);
+        child.node.setParent(this._scene);
       });
     });
 
-    return this._root;
+    return this._scene;
   }
 
-  //TODO: INCOMPLETE
-  // _parseAnimations(
-  //   animation: GLTFAnimation,
-  //   json: GlTf,
-  //   buffers: ArrayBufferLike[]
-  // ): Channel {
-  //   const channels = animation.channels;
+  _parseAnimations(
+    animation: GLTFAnimation,
+    json: GlTf,
+    buffers: ArrayBufferLike[]
+  ): Channel {
+    const channels = animation.channels.map((channel) => {
+      // get the sampler information for this channel
+      const sampler = animation.samplers[channel.sampler];
 
-  //   channels.map((channel) => {
-  //     // get target information
-  //     const target = channel.target;
+      // get the time data for the animation
+      const time = this._getBufferFromFile(
+        json,
+        buffers,
+        json.accessors[sampler.input]
+      );
 
-  //     // get the sampler information for this channel
-  //     const sampler = animation.samplers[channel.sampler];
+      // get the buffer data for the animation
+      const buffer = this._getBufferFromFile(
+        json,
+        buffers,
+        json.accessors[sampler.output]
+      );
 
-  //     // get the time data for the animation
-  //     const time = this._getBufferFromFile(
-  //       json,
-  //       buffers,
-  //       json.accessors![sampler.input]
-  //     );
+      return {
+        node: channel.target.node, // node to animate
+        type: channel.target.path, // type of animation (translation, rotation, scale)
+        time: time, // time data for the animation
+        buffer, // buffer data for the animation
+        interpolation: sampler.interpolation ? sampler.interpolation : "LINEAR", // interpolation type for the animation
+      };
+    });
 
-  //     // get the data for the animation
-  //     const buffer = this._getBufferFromFile(
-  //       json,
-  //       buffers,
-  //       json.accessors![sampler.output]
-  //     );
-  //   });
+    const c: Channel = {};
 
-  //   const c: Channel = {};
+    // construct transform data for each node at each frame of animation
+    channels.forEach((channel) => {
+      if (c[channel.node] === undefined) {
+        // store the jointnode that needs to be animated
+        const jointNode = this._nodes[channel.node].node;
 
-  //   return c;
-  // }
+        c[channel.node] = {
+          node: jointNode,
+          translation: [],
+          rotation: [],
+          scale: [],
+        };
+      }
+
+      // store the transform data for each frame of animation
+      for (let i = 0; i < channel.time.data.length; i++) {
+        const size =
+          channel.interpolation === "CUBICSPLINE"
+            ? channel.buffer.size * 3
+            : channel.buffer.size;
+
+        const offset =
+          channel.interpolation === "CUBICSPLINE" ? channel.buffer.size : 0;
+
+        const transform =
+          channel.type === "rotation"
+            ? quat.fromValues(
+                channel.buffer.data[i * size + offset],
+                channel.buffer.data[i * size + offset + 1],
+                channel.buffer.data[i * size + offset + 2],
+                channel.buffer.data[i * size + offset + 3]
+              )
+            : vec3.fromValues(
+                channel.buffer.data[i * size + offset],
+                channel.buffer.data[i * size + offset + 1],
+                channel.buffer.data[i * size + offset + 2]
+              );
+
+        c[channel.node][channel.type].push({
+          time: channel.time.data[i],
+          transform,
+          type: channel.type,
+        } as Keyframe);
+      }
+    });
+
+    return c;
+  }
 
   _parseSkin(gltf: GlTf, skin: GLTFSkin, buffers: ArrayBufferLike[]): Skin {
     const bindTransforms = this._getBufferFromFile(
       gltf,
       buffers,
-      gltf.accessors![skin.inverseBindMatrices!]
+      gltf.accessors[skin.inverseBindMatrices]
     );
-    const joints = skin.joints.map((ndx) => this._nodes[ndx].node);
-    return new Skin(joints, bindTransforms.data as Float32Array);
+    const joints = skin.joints.map((ndx) => {
+      const jointNode = this._nodes[ndx].node;
+      jointNode.isJoint = true;
+      return jointNode;
+    });
+    return new Skin(joints, Float32Array.from(bindTransforms.data));
   }
 
   _parseNode(index: number, node: GLTFNode) {
@@ -1057,7 +1108,7 @@ export default class GLTFLoader {
 
     const n = new Node();
     n.name = name;
-    n!.transform = trs;
+    n.transform = trs;
 
     return {
       id: index,
@@ -1119,39 +1170,47 @@ export default class GLTFLoader {
 
           draco.destroy(decoderBuffer);
 
-          //TODO: add support for skinned meshes
-
           const geometry: GeometryBuffers = {
-            //@ts-ignore
             positions: dracoGeometry.attributes.POSITION.array as Float32Array,
-            //@ts-ignore
             normals: dracoGeometry.attributes.NORMAL
-              ? (dracoGeometry.attributes.NORMAL!.array as Float32Array)
+              ? (dracoGeometry.attributes.NORMAL.array as Float32Array)
               : undefined,
-            //@ts-ignore
             uvs: dracoGeometry.attributes.TEXCOORD_0
-              ? (dracoGeometry.attributes.TEXCOORD_0!.array as Float32Array)
+              ? (dracoGeometry.attributes.TEXCOORD_0.array as Float32Array)
               : undefined,
-            //@ts-ignore
             uvs2: dracoGeometry.attributes.TEXCOORD_1
-              ? (dracoGeometry.attributes.TEXCOORD_1!.array as Float32Array)
+              ? (dracoGeometry.attributes.TEXCOORD_1.array as Float32Array)
               : undefined,
             indices: dracoGeometry.index
               ? (dracoGeometry.index.array as Uint16Array)
               : undefined,
           };
 
-          // let m: Mesh | SkinMesh;
-          // let s: Program;
+          // get joints from buffer
+          const joints = dracoGeometry.attributes.JOINTS_0 || undefined;
 
-          const s =
+          const weights = dracoGeometry.attributes.WEIGHTS_0 || undefined;
+
+          let m: Mesh | SkinMesh;
+
+          const prog =
             this._materials && primitive.material !== undefined
               ? this._materials[primitive.material as number]
               : new Program(vertexShader, fragmentShader);
 
-          const m = new Mesh(geometry);
+          if (node && node.skin !== undefined) {
+            console.log("skinned mesh detected");
 
-          const ds = new DrawSet(m, s);
+            // form skinned mesh data if joints defined
+            m = new SkinMesh(geometry);
+
+            m.setAttribute(Float32Array.from(joints.array), joints.itemSize, 5);
+            m.setAttribute(weights.array, weights.itemSize, 6);
+          } else {
+            m = new Mesh(geometry);
+          }
+
+          const ds = new DrawSet(m, prog);
           ds.name = mesh.name;
 
           this._drawSetsFlattened.push(ds);
@@ -1161,7 +1220,7 @@ export default class GLTFLoader {
       } else {
         if (primitive.indices !== undefined) {
           // get index accessor
-          const indexAccesor = gltf.accessors![primitive.indices!];
+          const indexAccesor = gltf.accessors[primitive.indices];
 
           const uvs =
             this._getBufferByAttribute(
@@ -1171,6 +1230,7 @@ export default class GLTFLoader {
               primitive,
               "TEXCOORD_0"
             ) || undefined;
+
           const uvs2 =
             this._getBufferByAttribute(
               gltf,
@@ -1179,6 +1239,7 @@ export default class GLTFLoader {
               primitive,
               "TEXCOORD_1"
             ) || undefined;
+
           const normals =
             this._getBufferByAttribute(
               gltf,
@@ -1187,8 +1248,10 @@ export default class GLTFLoader {
               primitive,
               "NORMAL"
             ) || undefined;
+
           const indices =
             this._getBufferFromFile(gltf, buffers, indexAccesor) || undefined;
+
           const positions =
             this._getBufferByAttribute(
               gltf,
@@ -1202,10 +1265,10 @@ export default class GLTFLoader {
           const geometry: GeometryBuffers = {
             // every geometry should have position data by default
             positions: positions.data as Float32Array,
-            normals: normals ? (normals!.data as Float32Array) : undefined,
-            uvs: uvs ? (uvs!.data as Float32Array) : undefined,
-            uvs2: uvs2 ? (uvs2!.data as Float32Array) : undefined,
-            indices: indices ? (indices!.data as Int16Array) : undefined,
+            normals: normals ? (normals.data as Float32Array) : undefined,
+            uvs: uvs ? (uvs.data as Float32Array) : undefined,
+            uvs2: uvs2 ? (uvs2.data as Float32Array) : undefined,
+            indices: indices ? (indices.data as Int16Array) : undefined,
           };
 
           // get joints from buffer
@@ -1230,31 +1293,26 @@ export default class GLTFLoader {
 
           let m: Mesh | SkinMesh;
 
-          const s =
+          const prog =
             this._materials && primitive.material !== undefined
               ? this._materials[primitive.material as number]
               : new Program(vertexShader, fragmentShader);
 
           if (node && node.skin !== undefined) {
+            console.log("skinned mesh detected");
             // form skinned mesh data if joints defined
             m = new SkinMesh(geometry);
-            m.setAttribute(Float32Array.from(joints!.data), joints!.size, {
-              program: s,
-              attributeName: "aJoints",
-            });
-            m.setAttribute(
-              weights!.data,
-              weights!.size,
-              { program: s, attributeName: "aWeights" },
-              FLOAT
-            );
+
+            m.setAttribute(Float32Array.from(joints.data), joints.size, 5);
+            m.setAttribute(weights.data, weights.size, 6);
           } else {
             m = new Mesh(geometry);
           }
 
-          const ds = new DrawSet(m, s);
-          ds.name = mesh.name;
+          const ds = new DrawSet(m, prog);
+          ds.name = m.name;
 
+          // for non-hierarchical gltf files
           this._drawSetsFlattened.push(ds);
 
           return ds;
@@ -1271,8 +1329,7 @@ export default class GLTFLoader {
     // determine whether this material has skinning
     this._nodes.forEach((node) => {
       if (node.mesh !== undefined) {
-        const mesh = gltf.meshes![node.mesh];
-
+        const mesh = gltf.meshes[node.mesh];
         mesh.primitives.forEach((primitive) => {
           if (primitive.material === index) {
             node.skin !== undefined ? (hasSkin = true) : (hasSkin = false);
@@ -1301,18 +1358,26 @@ export default class GLTFLoader {
     }
 
     if (material.pbrMetallicRoughness !== undefined) {
-      const { baseColorTexture, baseColorFactor } =
+      const { baseColorTexture, baseColorFactor, metallicRoughnessTexture } =
         material.pbrMetallicRoughness;
-
-      program.activate();
 
       // program.setTexture( "mapAlbedo", new Texture2D() );
       // program.setTexture( "mapRadiance", this._radianceMap );
       // program.setTexture( "mapIrradiance", this._irradianceMap );
 
-      if (baseColorTexture !== undefined) {
-        program.setTexture("mapAlbedo", this._textures[baseColorTexture.index]);
-      }
+      console.log(baseColorFactor);
+      program.activate();
+      //program.setTexture("jointTexture", t, 0);
+      // if (baseColorTexture !== undefined) {
+      //   program.setTexture("mapAlbedo", this._textures[baseColorTexture.index]);
+      // }
+
+      // if (metallicRoughnessTexture !== undefined) {
+      //   program.setTexture(
+      //     "mapMetallicRoughness",
+      //     this._textures[metallicRoughnessTexture.index]
+      //   );
+      // }
 
       if (baseColorFactor !== undefined) {
         program.setVector4(
@@ -1327,19 +1392,27 @@ export default class GLTFLoader {
       }
     }
 
+    // if (material.normalTexture !== undefined) {
+    //   program.activate();
+    //   program.setTexture(
+    //     "mapNormal",
+    //     this._textures[material.normalTexture.index]
+    //   );
+    // }
+
     return program;
   }
 
   async _parseTexture(gltf: GlTf, texture: GLTFTexture) {
-    const t = gltf.images![texture.source!];
-    const s = gltf.samplers![texture.sampler!];
+    const t = gltf.images[texture.source];
+    const s = gltf.samplers[texture.sampler];
 
     let boltTexture = new Texture2D();
 
     if (t.bufferView !== undefined) {
-      const bufferView = gltf.bufferViews![t.bufferView!];
+      const bufferView = gltf.bufferViews[t.bufferView];
 
-      const data = gltf.buffers![bufferView.buffer].binary;
+      const data = gltf.buffers[bufferView.buffer].binary;
 
       const blob = new Blob([
         new Uint8Array(data, bufferView.byteOffset, bufferView.byteLength),
@@ -1371,8 +1444,8 @@ export default class GLTFLoader {
 
       boltTexture.flipY = false;
 
-      boltTexture.minFilter = s.minFilter! || LINEAR;
-      boltTexture.magFilter = s.magFilter! || LINEAR;
+      boltTexture.minFilter = s.minFilter || LINEAR;
+      boltTexture.magFilter = s.magFilter || LINEAR;
 
       await boltTexture.load();
     }
@@ -1395,7 +1468,7 @@ export default class GLTFLoader {
   }
 
   _getBufferFromFile(gltf: GlTf, buffers: ArrayBuffer[], accessor: Accessor) {
-    const bufferView = gltf.bufferViews![<number>accessor.bufferView];
+    const bufferView = gltf.bufferViews[<number>accessor.bufferView];
 
     const type = accessor.type;
 
@@ -1442,7 +1515,7 @@ export default class GLTFLoader {
     attributeName: string
   ) => {
     const attribute = primitive.attributes[attributeName];
-    return gltf.accessors![attribute];
+    return gltf.accessors[attribute];
   };
 
   _decodeGLB(glb: ArrayBufferLike) {
@@ -1726,17 +1799,15 @@ export default class GLTFLoader {
     };
   }
 
-  public get root(): Node {
-    return this._root;
-  }
-  public set root(value: Node) {
-    this._root = value;
-  }
-
   public get drawSetsFlattened(): DrawSet[] {
     return this._drawSetsFlattened;
   }
+
   public set drawSetsFlattened(value: DrawSet[]) {
     this._drawSetsFlattened = value;
+  }
+
+  public get animations(): Channel {
+    return this._animations;
   }
 }

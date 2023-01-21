@@ -65,7 +65,8 @@ export default class FBOSim {
   private _runBlit(texture: Texture2D, fbo: FBO) {
     fbo.bind();
     this._throughProgram.activate();
-    this._throughProgram.setTexture("map", texture);
+    this._throughProgram.setTexture("map", texture, 0);
+    texture.bind(0);
     this._drawSetblit.program = this._throughProgram;
     this._bolt.clear(0, 0, 0, 1);
     this._bolt.draw(this._drawSetblit);
@@ -142,20 +143,6 @@ export default class FBOSim {
             fboSwapDefinition.read.height
           )
         );
-
-        if (fboSwapDefinition.inputs) {
-          //TODO: needs work
-          fboSwapDefinition.inputs.forEach((input) => {
-            // console.log("------------------------------------");
-            // console.log(input.name);
-            // console.log(fboSwapDefinition.read.name);
-            // console.log("------------------------------------");
-            program.setTexture(
-              input.name,
-              fboSwapDefinition.read.targetTexture
-            );
-          });
-        }
       }
 
       this._bolt.clear(0, 0, 0, 1);
@@ -176,7 +163,8 @@ export default class FBOSim {
       this._bolt.setViewPort(0, 0, pass1.read.width * 3, pass1.read.height * 3);
       this._bolt.clear(0, 0, 0, 1);
       this._outProgram.activate();
-      this._outProgram.setTexture("map", pass1.read.targetTexture);
+      this._outProgram.setTexture("map", pass1.read.targetTexture, 0);
+      pass1.read.targetTexture.bind(0);
       this._bolt.draw(this._drawSetOut);
     }
   }

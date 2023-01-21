@@ -1,3 +1,4 @@
+import { flattenFloatArray } from "../../core/GLUtils";
 import { Mesh, Node, Program, GeometryBuffers, MeshParams } from "../../";
 import Skin from "./Skin";
 
@@ -6,7 +7,6 @@ export default class SkinMesh extends Mesh {
 
   constructor(geometry?: GeometryBuffers, params?: MeshParams) {
     super(geometry, params);
-
     this.isSkinMesh = true;
   }
 
@@ -14,14 +14,16 @@ export default class SkinMesh extends Mesh {
     if (!this._skin || !node) return;
 
     this._skin.update(node!);
+    program.activate();
 
     // activate program and pass joint data to program
-    program.activate();
-    //program.setTexture("jointTexture", this._skin.jointTexture);
+    program.setTexture("jointTexture", this._skin.jointTexture, 0);
+    this._skin.jointTexture.bind(0);
 
-    this._skin.jointMatrices.forEach((jointMatrix, i) => {
-      program.setMatrix4(`jointTransforms[${i}]`, jointMatrix);
-    });
+    program.setMatrix4(
+      "jointTransforms",
+      flattenFloatArray(this.skin!.jointMatrices)
+    );
 
     program.setFloat("jointCount", this._skin.joints.length);
 

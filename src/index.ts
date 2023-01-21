@@ -18,10 +18,14 @@ import Camera from "./core/Camera";
 import Bolt from "./core/Bolt";
 
 import AxisAlignedBox from "./modules/raycast/AxisAlignedBox";
-import AssetCache from "./modules/asset-cache";
+import AssetCache, { AssetType } from "./modules/asset-cache";
 import Clock from "./modules/clock";
 import { DracoDecoder } from "./modules/draco-decoder";
-import GLTFLoader from "./modules/gltf-loader";
+import GLTFLoader, {
+  GLTFScene,
+  Channel,
+  KeyFrame,
+} from "./modules/gltf-loader";
 import DrawState from "./modules/draw-state";
 import EventListeners from "./modules/event-listeners";
 import FBOSim, { FBOSwapDefinition } from "./modules/fbo-sim";
@@ -69,9 +73,13 @@ export {
   IBO,
   VBOInstanced,
   AssetCache,
+  AssetType,
   Clock,
   DracoDecoder,
   GLTFLoader,
+  GLTFScene,
+  Channel,
+  KeyFrame,
   DrawState,
   EventListeners,
   FBOSim,

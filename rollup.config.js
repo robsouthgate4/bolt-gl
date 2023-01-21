@@ -69,12 +69,13 @@ export default [ {
 			dir: "build/cjs",
 			format: "cjs",
 			sourcemap: false,
+			exports: "auto"
 		},
 		{
 			dir: "build/esm",
 			format: "esm",
 			sourcemap: false,
-		}
+		},
 	],
 	plugins: [
 		glslify( glslifyOptions ),
