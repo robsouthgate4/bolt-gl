@@ -50,6 +50,7 @@ export default class VBOInstanced {
   public get buffer(): WebGLBuffer {
     return this._buffer;
   }
+
   public set buffer(value: WebGLBuffer) {
     this._buffer = value;
   }

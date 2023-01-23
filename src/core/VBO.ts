@@ -24,9 +24,11 @@ export default class VBO {
   delete() {
     this._gl.deleteBuffer(this._buffer);
   }
+
   public get buffer(): WebGLBuffer {
     return this._buffer;
   }
+
   public set buffer(value: WebGLBuffer) {
     this._buffer = value;
   }

@@ -49,13 +49,11 @@ export default class VAO {
 
       this._gl.enableVertexAttribArray(location);
 
-      //@ts-ignore
       this._gl[pointerMethod](
         location,
         numComponents,
         type,
-        // @ts-ignore
-        false,
+        false as never,
         stride,
         offset
       );
@@ -66,13 +64,11 @@ export default class VAO {
       const location = <number>layoutID;
       this._gl.enableVertexAttribArray(location);
 
-      //@ts-ignore
       this._gl[pointerMethod](
         location,
         numComponents,
         type,
-        // @ts-ignore
-        false,
+        false as never,
         stride,
         offset
       );

@@ -29,6 +29,7 @@ export default class CameraPersp extends Camera {
   }
 
   /**
+   * Sets the camera to look at a target point
    * @param  {vec3} target
    */
   lookAt(target: vec3) {
@@ -43,27 +44,43 @@ export default class CameraPersp extends Camera {
     this._aspect = aspect;
   }
 
+  /**
+   * Get the camera's far plane
+   */
   public get far(): number {
     return this._far;
   }
+
+  /**
+   * Set the camera's far plane
+   * @param  {number} value
+   * @returns void
+   *
+   */
   public set far(value: number) {
     this._far = value;
   }
+
   public get near(): number {
     return this._near;
   }
+
   public set near(value: number) {
     this._near = value;
   }
+
   public get fov(): number {
     return this._fov;
   }
+
   public set fov(value: number) {
     this._fov = value * (Math.PI / 180);
   }
+
   public get aspect(): number {
     return this._aspect;
   }
+
   public set aspect(value: number) {
     this._aspect = value;
   }

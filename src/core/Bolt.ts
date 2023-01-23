@@ -63,7 +63,7 @@ export default class Bolt {
 
     this._gl.pixelStorei(this._gl.UNPACK_FLIP_Y_WEBGL, false);
 
-    this._printBanner();
+    this.printBanner();
 
     this._dpi = dpi;
 
@@ -73,7 +73,7 @@ export default class Bolt {
     this.resizeCanvasToDisplay();
   }
 
-  private _printBanner() {
+  private printBanner() {
     const style = [
       "font-size: 1em",
       "padding: 10px",
@@ -219,7 +219,7 @@ export default class Bolt {
    * @param  {DrawSet[]} nodes
    * calculate node depth from the currently bound camera
    */
-  _sortByDepth(nodes: DrawSet[]) {
+  private sortByDepth(nodes: DrawSet[]) {
     nodes.forEach((node: Node) => {
       vec3.copy(this._sortVec3, node.worldPosition);
       vec3.transformMat4(
@@ -238,9 +238,9 @@ export default class Bolt {
   /**
    * Trigger a depth sort of opaque and transparent nodes
    */
-  _forceDepthSort() {
-    this._sortByDepth(this._opaqueNodes);
-    this._sortByDepth(this._transparentNodes);
+  private forceDepthSort() {
+    this.sortByDepth(this._opaqueNodes);
+    this.sortByDepth(this._transparentNodes);
   }
 
   /**
@@ -314,8 +314,8 @@ export default class Bolt {
       });
 
       if (this._autoSort) {
-        this._sortByDepth(this._opaqueNodes);
-        this._sortByDepth(this._transparentNodes);
+        this.sortByDepth(this._opaqueNodes);
+        this.sortByDepth(this._transparentNodes);
       }
 
       // draw opaque nodes first
@@ -333,6 +333,7 @@ export default class Bolt {
   public get dpi(): number {
     return this._dpi;
   }
+
   public set dpi(value: number) {
     this._dpi = value;
   }
@@ -344,6 +345,7 @@ export default class Bolt {
   public get autoSort() {
     return this._autoSort;
   }
+
   public set autoSort(value) {
     this._autoSort = value;
   }

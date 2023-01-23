@@ -61,7 +61,7 @@ export default class Mesh {
     this._instanceCount = params?.instanceCount;
     this._vao = new VAO();
 
-    this._linkDefaultBuffers();
+    this.linkDefaultBuffers();
 
     if (
       this._defaultBuffers.indices &&
@@ -143,7 +143,7 @@ export default class Mesh {
     this._vao.unbind();
   }
 
-  private _linkDefaultBuffers() {
+  private linkDefaultBuffers() {
     const positionVbo = new VBO(
       new Float32Array(this._defaultBuffers.positions!)
     );
@@ -217,8 +217,6 @@ export default class Mesh {
     positionVbo.unbind();
     normalVbo.unbind();
     uvVbo.unbind();
-
-    //this._storeFaces();
   }
 
   calculateBoxBounds() {
@@ -397,6 +395,7 @@ export default class Mesh {
   public get isSkinMesh() {
     return this._isSkinMesh;
   }
+
   public set isSkinMesh(value) {
     this._isSkinMesh = value;
   }
@@ -404,6 +403,7 @@ export default class Mesh {
   public get vao(): VAO {
     return this._vao;
   }
+
   public set vao(value: VAO) {
     this._vao = value;
   }

@@ -62,6 +62,7 @@ export default class CameraOrtho extends Camera {
   public get near(): number {
     return this._near;
   }
+
   public set near(value: number) {
     this._near = value;
   }
@@ -69,6 +70,7 @@ export default class CameraOrtho extends Camera {
   public get far(): number {
     return this._far;
   }
+
   public set far(value: number) {
     this._far = value;
   }
@@ -76,6 +78,7 @@ export default class CameraOrtho extends Camera {
   public get left(): number {
     return this._left;
   }
+
   public set left(value: number) {
     this._left = value;
   }
@@ -83,6 +86,7 @@ export default class CameraOrtho extends Camera {
   public get right(): number {
     return this._right;
   }
+
   public set right(value: number) {
     this._right = value;
   }
@@ -90,6 +94,7 @@ export default class CameraOrtho extends Camera {
   public get bottom(): number {
     return this._bottom;
   }
+
   public set bottom(value: number) {
     this._bottom = value;
   }
@@ -97,6 +102,7 @@ export default class CameraOrtho extends Camera {
   public get top(): number {
     return this._top;
   }
+
   public set top(value: number) {
     this._top = value;
   }

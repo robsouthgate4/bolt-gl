@@ -61,6 +61,7 @@ export default class Camera extends Node {
   public get forward(): vec3 {
     return this._forward;
   }
+
   public set forward(value: vec3) {
     this._forward = value;
   }
@@ -68,6 +69,7 @@ export default class Camera extends Node {
   public get projection(): mat4 {
     return this._projection;
   }
+
   public set projection(value: mat4) {
     this._projection = value;
   }
@@ -79,6 +81,7 @@ export default class Camera extends Node {
   public get target() {
     return this._target;
   }
+
   public set target(value) {
     this._target = value;
   }
@@ -86,6 +89,7 @@ export default class Camera extends Node {
   public get up(): vec3 {
     return this._up;
   }
+
   public set up(value: vec3) {
     this._up = value;
   }

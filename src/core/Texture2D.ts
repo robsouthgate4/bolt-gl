@@ -45,10 +45,10 @@ export default class Texture2D extends Texture {
       target,
     });
 
-    this._init();
+    this.init();
   }
 
-  _init() {
+  init() {
     this._texture = <WebGLTexture>this._gl.createTexture();
     this.bind();
 
@@ -64,7 +64,7 @@ export default class Texture2D extends Texture {
       null
     );
 
-    this._applySettings();
+    this.applySettings();
 
     this.unbind();
   }
@@ -82,7 +82,7 @@ export default class Texture2D extends Texture {
       this._type,
       this._data || null
     );
-    this._applySettings();
+    this.applySettings();
     this.unbind();
   }
 
@@ -108,7 +108,7 @@ export default class Texture2D extends Texture {
     this._width = width;
     this._height = height;
     this._data = data;
-    this._applySettings();
+    this.applySettings();
 
     this.unbind();
   }
@@ -133,7 +133,7 @@ export default class Texture2D extends Texture {
           image
         );
 
-        this._applySettings();
+        this.applySettings();
 
         resolve(image);
 
