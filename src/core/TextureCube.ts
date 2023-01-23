@@ -70,7 +70,7 @@ export default class TextureCube extends Texture {
     this._files = files;
   }
 
-  _init() {
+  init() {
     this._texture = <WebGLTexture>this._gl.createTexture();
 
     this.bind();
@@ -92,7 +92,7 @@ export default class TextureCube extends Texture {
 
     this.unbind();
 
-    this._applySettings();
+    this.applySettings();
   }
 
   load() {

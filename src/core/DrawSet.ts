@@ -20,6 +20,7 @@ export default class DrawSet extends Node {
   public get program(): Program {
     return this._program;
   }
+
   public set program(value: Program) {
     this._program = value;
   }

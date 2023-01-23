@@ -30,12 +30,15 @@ export default class IBO {
   public get indicesBuffer(): WebGLBuffer | null {
     return this._indicesBuffer;
   }
+
   public set indicesBuffer(value: WebGLBuffer | null) {
     this._indicesBuffer = value;
   }
+
   public get count(): number {
     return this._count;
   }
+
   public set count(value: number) {
     this._count = value;
   }

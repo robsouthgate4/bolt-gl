@@ -80,13 +80,13 @@ export default class FBO {
 
     // if sample count provided, create a multisampled framebuffer
     if (this._isMSAA) {
-      this._initMSAA();
+      this.initMSAA();
 
       /**
        * Attach depth buffer and setup texture if depth is true
        */
       if (depth) {
-        this._attachDepthTexture();
+        this.attachDepthTexture();
       }
 
       this.unbind();
@@ -110,14 +110,14 @@ export default class FBO {
        * Attach depth buffer and setup texture if depth is true
        */
       if (depth) {
-        this._attachDepthTexture();
+        this.attachDepthTexture();
       }
 
       this.unbind();
     }
   }
 
-  _initMSAA() {
+  private initMSAA() {
     this._MSAAFramebuffers = [
       this._gl.createFramebuffer(),
       this._gl.createFramebuffer(),
@@ -184,7 +184,7 @@ export default class FBO {
     );
   }
 
-  _attachDepthTexture() {
+  private attachDepthTexture() {
     this._depthTexture = new Texture2D({
       width: this._width,
       height: this._height,
@@ -353,9 +353,11 @@ export default class FBO {
   public get width() {
     return this._width;
   }
+
   public set width(value) {
     this._width = value;
   }
+
   public get height() {
     return this._height;
   }

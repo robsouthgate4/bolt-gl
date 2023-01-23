@@ -44,12 +44,15 @@ export default class RBO {
   public get width() {
     return this._width;
   }
+
   public set width(value) {
     this._width = value;
   }
+
   public get height() {
     return this._height;
   }
+
   public set height(value) {
     this._height = value;
   }

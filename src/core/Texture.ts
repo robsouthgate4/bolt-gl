@@ -79,7 +79,7 @@ export default abstract class Texture {
     this._flipY = flipY;
   }
 
-  abstract _init(): void;
+  abstract init(): void;
 
   abstract resize(width: number, height: number, depth?: number): void;
 
@@ -113,7 +113,7 @@ export default abstract class Texture {
     return (value & (value - 1)) == 0;
   }
 
-  _applySettings() {
+  protected applySettings() {
     this.bind();
 
     this._gl.pixelStorei(this._gl.UNPACK_FLIP_Y_WEBGL, this._flipY);
