@@ -280,7 +280,7 @@ export default class Bolt {
             this.cullFace(program.cullFace);
           }
         }
-
+        
         // skin meshes require node reference to update skin matrices
         if (node.mesh.isSkinMesh !== undefined) {
           node.mesh.draw(program, node);
