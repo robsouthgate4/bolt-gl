@@ -53,6 +53,8 @@ export default class Bolt {
       powerPreference = "default",
       alpha = true,
       premultipliedAlpha = true,
+      stencil = false,
+      preserveDrawingBuffer = false,
     }: BoltParams
   ) {
     this._gl = <WebGL2RenderingContext>canvas.getContext("webgl2", {
@@ -61,6 +63,8 @@ export default class Bolt {
       powerPreference,
       alpha,
       premultipliedAlpha,
+      stencil,
+      preserveDrawingBuffer,
     });
 
     this._gl.pixelStorei(this._gl.UNPACK_FLIP_Y_WEBGL, false);
@@ -69,6 +73,7 @@ export default class Bolt {
 
     this._dpi = dpi;
 
+    this.enableDepth();
     this.enableAlpha();
     this.enableCullFace();
     this.cullFace(BACK);
@@ -85,7 +90,7 @@ export default class Bolt {
     ].join(";");
 
     console.log(
-      `%c WebGL rendered with Bolt by Phantom.land \u26a1 \u26a1`,
+      `%c WebGL rendered with Bolt by RS CREATIVE STUDIO \u26a1 \u26a1`,
       style
     );
   }
