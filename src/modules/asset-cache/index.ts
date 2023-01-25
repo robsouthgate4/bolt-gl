@@ -6,7 +6,6 @@ import parseHdr from "../hdr-parse";
 import GLTFLoader from "../gltf-loader";
 import {
   Bolt,
-  DrawSet,
   FLOAT,
   RGBA,
   RGBA16F,
@@ -36,7 +35,6 @@ export default class AssetCache {
   private _cacheObj: {} = {};
   // eslint-disable-next-line @typescript-eslint/ban-types
   private _onProgressListeners: Function[] = [];
-  private _asyncConcurrency = 5;
   private _logs: any[] = [];
   private _debug = false;
   private _bolt = Bolt.getInstance();
@@ -147,7 +145,7 @@ export default class AssetCache {
   }
 
   // Loads all queued assets
-  async load() {
+  async load(concurrency = 5) {
     const queue = this._queueItems.slice();
     this._queueItems.length = 0; // clear queue
 
@@ -176,7 +174,7 @@ export default class AssetCache {
         const percent = (i + 1) / total;
         this._onProgressListeners.forEach((fn) => fn(percent));
       },
-      { concurrency: this._asyncConcurrency }
+      { concurrency }
     );
 
     if (this._debug) {
