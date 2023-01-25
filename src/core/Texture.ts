@@ -34,6 +34,7 @@ export default abstract class Texture {
   protected _imagePath: string;
   protected _pixelType: number;
   protected _name: string;
+  protected _currentUnit = -1;
 
   private _id: number;
 
@@ -93,9 +94,11 @@ export default abstract class Texture {
   load?(): void;
 
   bind(index?: number | undefined) {
+
     if (index !== undefined) {
       this._gl.activeTexture(TEXTURE0 + index);
-    } 
+    }
+
     this._gl.bindTexture(this._target, this._texture);
   }
 
@@ -112,7 +115,6 @@ export default abstract class Texture {
   }
 
   protected applySettings() {
-    this.bind();
 
     this._gl.pixelStorei(this._gl.UNPACK_FLIP_Y_WEBGL, this._flipY);
     this._gl.texParameteri(this._target, TEXTURE_WRAP_S, this._wrapS);
@@ -123,8 +125,6 @@ export default abstract class Texture {
     if (this._generateMipmaps) {
       this._gl.generateMipmap(this._target);
     }
-
-    this.unbind();
   }
 
   public get texture(): WebGLTexture {
@@ -243,4 +243,13 @@ export default abstract class Texture {
   public get id(): number {
     return this._id;
   }
+
+  public get currentUnit(): number {
+    return this._currentUnit;
+  }
+
+  public set currentUnit(value: number) {
+    this._currentUnit = value;
+  }
+
 }

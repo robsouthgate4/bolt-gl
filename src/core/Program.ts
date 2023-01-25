@@ -248,7 +248,9 @@ export default class Program {
     const location = this.getLocation(uniform);
     if (!location) return;
 
-    const unit = this._uniforms[uniform].textureUnit;    
+    const unit = this._uniforms[uniform].textureUnit;
+
+    texture.currentUnit = unit || 0;
     this._gl.uniform1i(location, unit || 0);
     this._uniforms[uniform] = { location, value: texture, textureUnit: unit };
   }
