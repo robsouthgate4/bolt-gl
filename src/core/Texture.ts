@@ -95,9 +95,7 @@ export default abstract class Texture {
   bind(index?: number | undefined) {
     if (index !== undefined) {
       this._gl.activeTexture(TEXTURE0 + index);
-    } else {
-      this._gl.activeTexture(TEXTURE0);
-    }
+    } 
     this._gl.bindTexture(this._target, this._texture);
   }
 

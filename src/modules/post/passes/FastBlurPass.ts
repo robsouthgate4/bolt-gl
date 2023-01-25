@@ -75,13 +75,12 @@ export default class FastBlurPass extends Pass {
 
       this.program.activate();
       this.program.setTexture("map", map);
+
       this.program.setFloat("radius", radius);
       this.program.setVector2(
         "direction",
         i % 2 === 0 ? vec2.fromValues(radius, 0) : vec2.fromValues(0, radius)
       );
-
-      this._bindTextures(this.program);
 
       this._bolt.clear(0, 0, 0, 0);
       this.fullScreenTriangle.draw(this.program);
@@ -99,9 +98,7 @@ export default class FastBlurPass extends Pass {
       this.program.activate();
       this.program.setVector2("direction", vec2.fromValues(0, 0));
       this.program.setTexture("map", readFBO.targetTexture);
-
-      this._bindTextures(this.program);
-
+      readFBO.targetTexture.bind(0);
       this._bolt.clear(0, 0, 0, 0);
       this.fullScreenTriangle.draw(this.program);
     }

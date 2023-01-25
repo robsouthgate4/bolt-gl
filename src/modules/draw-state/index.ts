@@ -11,24 +11,21 @@ import {
   VBO,
   AttribPointer,
   TypedArray,
+  Node,
   NONE,
 } from "../../";
 
 export default class DrawState {
   protected _bolt: Bolt;
-  protected _viewport: Viewport = {
-    offsetX: 0,
-    offsetY: 0,
-    width: 0,
-    height: 0,
-  };
-  protected _fbo?: FBO;
-  protected _drawSet?: DrawSet | undefined;
+  protected _fbo: FBO | undefined;
+  protected _drawSet: DrawSet | undefined;
   protected _instanceCount!: number;
   protected _mesh?: Mesh;
-
-  private _clearColor!: { r: number; g: number; b: number; a: number };
+  
+  protected _viewport: Viewport | undefined;
+  private _clearColor: { r: number; g: number; b: number; a: number } | undefined;
   private _cullFace = NONE;
+  private _node: Node | undefined;
 
   constructor(bolt: Bolt) {
     this._bolt = bolt;
@@ -42,6 +39,12 @@ export default class DrawState {
 
   setDrawSet(drawSet: DrawSet) {
     this._drawSet = drawSet;
+
+    return this;
+  }
+
+  setNode(node: Node) {
+    this._node = node;
 
     return this;
   }
@@ -187,17 +190,18 @@ export default class DrawState {
   }
 
   draw() {
-    if (this._fbo) {
-      this._fbo.bind();
-    }
 
-    this._viewport &&
-      this._bolt.setViewPort(
-        this._viewport.offsetX,
-        this._viewport.offsetY,
-        this._viewport.width,
-        this._viewport.height
-      );
+    // if (this._fbo) {
+    //   this._fbo.bind();
+    // }
+
+    // this._viewport &&
+    //   this._bolt.setViewPort(
+    //     this._viewport.offsetX,
+    //     this._viewport.offsetY,
+    //     this._viewport.width,
+    //     this._viewport.height
+    //   );
 
     this._clearColor &&
       this._bolt.clear(
@@ -212,17 +216,19 @@ export default class DrawState {
       this._bolt.cullFace(this._cullFace);
     }
 
-    if (this._drawSet) {
+    if (this._drawSet !== undefined) {
       this._bolt.draw(this._drawSet);
+    } else if( this._node !== undefined) {
+      this._bolt.draw(this._node);
     }
 
-    if (this._fbo) {
-      this._fbo.unbind();
-    }
+    // if (this._fbo) {
+    //   this._fbo.unbind();
+    // }
 
-    if (this._cullFace !== NONE) {
-      this._bolt.disableCullFace();
-    }
+    // if (this._cullFace !== NONE) {
+    //   this._bolt.disableCullFace();
+    // }
 
     return this;
   }

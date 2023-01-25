@@ -49,20 +49,6 @@ export abstract class Pass {
     return this;
   }
 
-  protected _bindTextures(program: Program) {
-    if (program.textures && program.textures.length > 0) {
-      for (let i = 0; i < program.textures.length; i++) {
-        const textureObject = program.textures[i];
-
-        textureObject.texture.textureUnit(
-          program,
-          textureObject.uniformName,
-          i
-        );
-      }
-    }
-  }
-
   set enabled(val: boolean) {
     this._enabled = val;
   }

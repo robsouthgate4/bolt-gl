@@ -757,7 +757,7 @@ export interface GLTFTransform {
 
 export interface GLTFScene {
   scene: Node;
-  loaded: GLTFLoader;
+  loader: GLTFLoader;
 }
 
 /**

@@ -38,6 +38,7 @@
     "gl-matrix": "^3.4.3"
   },
   "dependencies": {
+    "bolt-gl": "file:.yalc/bolt-gl",
     "gl-matrix": "^3.4.3",
     "p-map": "^5.5.0"
   },

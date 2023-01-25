@@ -23,13 +23,13 @@ uniform mat4 jointTransforms[64];
 uniform float jointCount;
 
 
-// mat4 getBoneMatrix(int jointNdx) {
-//   return mat4(
-//     texelFetch(jointTexture, ivec2(0, jointNdx), 0),
-//     texelFetch(jointTexture, ivec2(1, jointNdx), 0),
-//     texelFetch(jointTexture, ivec2(2, jointNdx), 0),
-//     texelFetch(jointTexture, ivec2(3, jointNdx), 0));
-// }
+mat4 getBoneMatrix(int jointNdx) {
+  return mat4(
+    texelFetch(jointTexture, ivec2(0, jointNdx), 0),
+    texelFetch(jointTexture, ivec2(1, jointNdx), 0),
+    texelFetch(jointTexture, ivec2(2, jointNdx), 0),
+    texelFetch(jointTexture, ivec2(3, jointNdx), 0));
+}
 
 void main() {
 
@@ -38,15 +38,15 @@ void main() {
 
   mat4 skinMatrix = mat4(1.0);
 
-  // skinMatrix =  getBoneMatrix(int(aJoints.x)) * aWeights.x +
-  //                 getBoneMatrix(int(aJoints.y)) * aWeights.y +
-  //                 getBoneMatrix(int(aJoints.z)) * aWeights.z +
-  //                 getBoneMatrix(int(aJoints.w)) * aWeights.w;
+  skinMatrix =  getBoneMatrix(int(aJoints.x)) * aWeights.x +
+                  getBoneMatrix(int(aJoints.y)) * aWeights.y +
+                  getBoneMatrix(int(aJoints.z)) * aWeights.z +
+                  getBoneMatrix(int(aJoints.w)) * aWeights.w;
 
-  skinMatrix = jointTransforms[int(aJoints.x)] * aWeights.x +
-                jointTransforms[int(aJoints.y)] * aWeights.y +
-                jointTransforms[int(aJoints.z)] * aWeights.z +
-                jointTransforms[int(aJoints.w)] * aWeights.w;
+  // skinMatrix = jointTransforms[int(aJoints.x)] * aWeights.x +
+  //               jointTransforms[int(aJoints.y)] * aWeights.y +
+  //               jointTransforms[int(aJoints.z)] * aWeights.z +
+  //               jointTransforms[int(aJoints.w)] * aWeights.w;
 
 
   Normal = (model * skinMatrix * vec4(aNormal, 0.0)).xyz;

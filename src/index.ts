@@ -4,6 +4,7 @@ import VAO from "./core/VAO";
 import Transform from "./core/Transform";
 import TextureCube from "./core/TextureCube";
 import Texture2D from "./core/Texture2D";
+import TextureSampler from "./core/TextureSampler";
 import Texture from "./core/Texture";
 import RBO from "./core/RBO";
 import Program from "./core/Program";
@@ -32,10 +33,14 @@ import FBOSim, { FBOSwapDefinition } from "./modules/fbo-sim";
 import TransformFeedback from "./modules/transform-feedback";
 import GPUPicker from "./modules/gpu-picker";
 import parseHdr from "./modules/hdr-parse";
-import Orbit from "./modules/orbit";
-import Post from "./modules/post";
 import Raycast from "./modules/raycast";
 import Ray from "./modules/raycast/Ray";
+import Orbit from "./modules/orbit";
+
+import Post from "./modules/post";
+import FastBlurPass from "./modules/post/passes/FastBlurPass";
+import ShaderPass from "./modules/post/passes/ShaderPass";
+import { Pass } from "./modules/post/passes/Pass";
 
 import { GL_RESIZE_TOPIC } from "./modules/event-listeners/constants";
 import { GL_TOUCH_END_TOPIC } from "./modules/event-listeners/constants";
@@ -49,6 +54,7 @@ import { GL_KEYUP_TOPIC } from "./modules/event-listeners/constants";
 import Cube from "./modules/primitives/Cube";
 import Plane from "./modules/primitives/Plane";
 import Sphere from "./modules/primitives/Sphere";
+import SkinMesh from "./modules/gltf-loader/SkinMesh";
 
 export * from "./core/GLUtils";
 export * from "./core/Constants";
@@ -56,6 +62,7 @@ export * from "./core/Types";
 
 export {
   Mesh,
+  SkinMesh,
   Camera,
   CameraPersp,
   CameraOrtho,
@@ -66,6 +73,7 @@ export {
   Program,
   Texture,
   Texture2D,
+  TextureSampler,
   TextureCube,
   Transform,
   VAO,
@@ -89,6 +97,9 @@ export {
   parseHdr,
   Orbit,
   Post,
+  ShaderPass,
+  FastBlurPass,
+  Pass,
   AxisAlignedBox,
   Ray,
   Raycast,

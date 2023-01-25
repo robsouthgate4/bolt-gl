@@ -34,6 +34,7 @@ export default class Program {
   };
   private _cullFace?: number | undefined = undefined;
   private _id = ID;
+  private _bolt: Bolt;
 
   constructor(
     vertexShaderSrc: string,
@@ -46,38 +47,20 @@ export default class Program {
 
     this._id = ID;
 
+    this._bolt = Bolt.getInstance();
+    this._gl = Bolt.getInstance().getContext();
+
     this._vertexShaderSource = vertexShaderSrc;
     this._fragmentShaderSource = fragmentShaderSrc;
+
+    this._vertexShader = <WebGLShader>this._gl.createShader(VERTEX_SHADER);
+    this._fragmentShader = <WebGLShader>this._gl.createShader(FRAGMENT_SHADER);
 
     this._textures = <TextureObject[]>[];
 
     this._uniforms = {};
 
-    this._gl = Bolt.getInstance().getContext();
-
-    const ext = this._gl.getExtension("KHR_parallel_shader_compile");
-
-    this._vertexShader = <WebGLShader>this._gl.createShader(VERTEX_SHADER);
-
-    this._gl.shaderSource(this._vertexShader, vertexShaderSrc);
-    this._gl.compileShader(this._vertexShader);
-
-    const vertexLogs = this._gl.getShaderInfoLog(this._vertexShader);
-
-    if (vertexLogs && vertexLogs.length > 0) {
-      throw vertexLogs;
-    }
-
-    this._fragmentShader = <WebGLShader>this._gl.createShader(FRAGMENT_SHADER);
-
-    this._gl.shaderSource(this._fragmentShader, fragmentShaderSrc);
-    this._gl.compileShader(this._fragmentShader);
-
-    const fragmentLogs = this._gl.getShaderInfoLog(this._fragmentShader);
-
-    if (fragmentLogs && fragmentLogs.length > 0) {
-      throw fragmentLogs;
-    }
+    this.linkShaders(vertexShaderSrc, fragmentShaderSrc);
 
     this._program = <WebGLProgram>this._gl.createProgram();
 
@@ -94,6 +77,16 @@ export default class Program {
     }
 
     this._gl.linkProgram(this._program);
+
+    this.linkUniforms();
+
+    this._gl.deleteShader(this._vertexShader);
+    this._gl.deleteShader(this._fragmentShader);
+  }
+
+  private linkUniforms() {
+
+    const ext = this._gl.getExtension("KHR_parallel_shader_compile");
 
     // use KHR extension to compile shaders in parallel
     if (ext) {
@@ -118,6 +111,7 @@ export default class Program {
     );
 
     const textureUniforms = [];
+    let textureUnit = -1;
 
     // get the active uniform locations and populate the uniform object
     for (let i = 0; i < uniformCount; i++) {
@@ -132,87 +126,116 @@ export default class Program {
       if (!location) continue;
 
       if (uniform.type === SAMPLER_2D || uniform.type === SAMPLER_CUBE) {
+
+        textureUnit++;
+
         textureUniforms.push({
           name: uniformName,
           value: undefined,
           type: uniform.type,
           location,
+          textureUnit
         });
+
+        this.activate();
+        this._gl.uniform1i(location, textureUnit);
+        
       } else {
         this._uniforms[uniformName] = { location, value: undefined };
       }
     }
 
-    textureUniforms.forEach((uniform, index) => {
+    textureUniforms.forEach((uniform,) => {
       this._uniforms[uniform.name] = {
         location: uniform.location,
         value: uniform.value,
-        textureUnit: index,
+        textureUnit: uniform.textureUnit,
       };
     });
 
-    this._gl.deleteShader(this._vertexShader);
-    this._gl.deleteShader(this._fragmentShader);
+  }
+
+
+  private linkShaders(vertexShaderSrc: string, fragmentShaderSrc: string) {
+
+    this._gl.shaderSource(this._vertexShader, vertexShaderSrc);
+    this._gl.compileShader(this._vertexShader);
+
+    const vertexLogs = this._gl.getShaderInfoLog(this._vertexShader);
+
+    if (vertexLogs && vertexLogs.length > 0) {
+      throw vertexLogs;
+    }
+
+    this._gl.shaderSource(this._fragmentShader, fragmentShaderSrc);
+    this._gl.compileShader(this._fragmentShader);
+
+    const fragmentLogs = this._gl.getShaderInfoLog(this._fragmentShader);
+
+    if (fragmentLogs && fragmentLogs.length > 0) {
+      throw fragmentLogs;
+    }
+
   }
 
   setBool(uniform: string, value: number) {
-    const location = this._getLocation(uniform);
+    const location = this.getLocation(uniform);
     if (!location) return;
     this._gl.uniform1i(location, +value);
     this._uniforms[uniform] = { location, value };
   }
 
   setInt(uniform: string, value: number) {
-    const location = this._getLocation(uniform);
+    const location = this.getLocation(uniform);
     if (!location) return;
     this._gl.uniform1i(location, value);
     this._uniforms[uniform] = { location, value };
   }
 
   setFloat(uniform: string, value: number) {
-    const location = this._getLocation(uniform);
+    const location = this.getLocation(uniform);
     if (!location) return;
     this._uniforms[uniform] = { location, value };
     this._gl.uniform1f(location, value);
   }
 
   setVector2(uniform: string, value: vec2) {
-    const location = this._getLocation(uniform);
+    const location = this.getLocation(uniform);
     if (!location) return;
     this._gl.uniform2fv(location, value);
     this._uniforms[uniform] = { location, value };
   }
 
   setVector3(uniform: string, value: vec3) {
-    const location = this._getLocation(uniform);
+    const location = this.getLocation(uniform);
     if (!location) return;
     this._gl.uniform3fv(location, value);
     this._uniforms[uniform] = { location, value };
   }
 
   setVector4(uniform: string, value: vec4) {
-    const location = this._getLocation(uniform);
+    const location = this.getLocation(uniform);
     if (!location) return;
     this._gl.uniform4fv(location, value);
     this._uniforms[uniform] = { location, value };
   }
 
   setMatrix2(uniform: string, value: mat2) {
-    const location = this._getLocation(uniform);
+    const location = this.getLocation(uniform);
     if (!location) return;
     this._gl.uniformMatrix2fv(location, false, value);
     this._uniforms[uniform] = { location, value };
   }
 
   setMatrix3(uniform: string, value: mat3) {
-    const location = this._getLocation(uniform);
+    const location = this.getLocation(uniform);
     if (!location) return;
     this._gl.uniformMatrix3fv(location, false, value);
     this._uniforms[uniform] = { location, value };
   }
 
   setMatrix4(uniform: string, value: mat4) {
-    const location = this._getLocation(uniform);
+    const location = this.getLocation(uniform);
     if (!location) return;
     this._gl.uniformMatrix4fv(location, false, value);
     this._uniforms[uniform] = { location, value };
@@ -221,22 +244,16 @@ export default class Program {
   setTexture(
     uniform: string,
     texture: Texture | TextureCube,
-    textureUnit?: number
   ) {
-    const location = this._getLocation(uniform);
+    const location = this.getLocation(uniform);
     if (!location) return;
 
-    const unit =
-      textureUnit === undefined
-        ? this._uniforms[uniform].textureUnit
-        : textureUnit;
-
+    const unit = this._uniforms[uniform].textureUnit;    
     this._gl.uniform1i(location, unit || 0);
-
     this._uniforms[uniform] = { location, value: texture, textureUnit: unit };
   }
 
-  _getLocation(uniform: string) {
+  private getLocation(uniform: string) {
     let location: WebGLUniformLocation | null;
     if (this._uniforms[uniform] !== undefined) {
       location = this._uniforms[uniform].location;
@@ -247,7 +264,18 @@ export default class Program {
   }
 
   activate() {
+    if(this._bolt.activeProgram === this) return;
     this._gl.useProgram(this._program);
+    this._bolt.activeProgram = this;
+  }
+
+  use() {
+    Object.values(this._uniforms).forEach((uniform) => {
+      if(uniform.value instanceof Texture) {
+          const texture = uniform.value;
+          texture.bind(uniform.textureUnit);
+      }
+    });
   }
 
   disable() {

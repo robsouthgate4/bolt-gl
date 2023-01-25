@@ -19,6 +19,7 @@ import {
   SRC_ALPHA,
 } from "./Constants";
 import Camera from "./Camera";
+import Texture from "./Texture";
 
 export default class Bolt {
   private static _instance: Bolt;
@@ -32,7 +33,8 @@ export default class Bolt {
   private _opaqueNodes: DrawSet[] = [];
   private _activePrograms: Program[] = [];
   private _activeProgram!: Program;
-
+  private _activeTextureUnit = -1;
+  
   static getInstance(): Bolt {
     if (!Bolt._instance) Bolt._instance = new Bolt();
     return Bolt._instance;
@@ -249,8 +251,6 @@ export default class Bolt {
   draw(drawables: Node) {
     this._camera.update();
 
-    this._activePrograms = [];
-
     const render = (node: Node) => {
       if (node.parent && !node.parent.draw) return;
 
@@ -262,7 +262,7 @@ export default class Bolt {
         if (!node.mesh.vao) return;
 
         const { program } = node;
-        program.activate();
+        program.use();
 
         node.updateMatrices(program, this._camera);
 
@@ -303,7 +303,6 @@ export default class Bolt {
         drawables.updateModelMatrix();
 
         if (node instanceof DrawSet) {
-          this._activePrograms.push(node.program);
 
           if (node.program.transparent) {
             this._transparentNodes.push(node);
@@ -349,4 +348,21 @@ export default class Bolt {
   public set autoSort(value) {
     this._autoSort = value;
   }
+
+  public set activeProgram(program: Program) {
+    this._activeProgram = program;
+  }
+
+  public get activeProgram() {
+    return this._activeProgram;
+  }
+
+  public get activeTextureUnit() {
+    return this._activeTextureUnit;
+  }
+  
+  public set activeTextureUnit(value) {
+    this._activeTextureUnit = value;
+  }
+
 }

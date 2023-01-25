@@ -26,7 +26,6 @@ export default class TextureSampler {
   } = {}) {
     this._gl = this._bolt.getContext();
     this._sampler = <WebGLSampler>this._gl.createSampler();
-
     this._minFilter = minFilter;
     this._magFilter = magFilter;
     this._wrapS = wrapS;
@@ -35,8 +34,6 @@ export default class TextureSampler {
     this._maxLod = maxLod;
     this._compareMode = compareMode;
     this._compareFunc = compareFunc;
-
-    this.bind(0);
     this.applySettings();
   }
 
@@ -88,5 +85,9 @@ export default class TextureSampler {
    */
   bind(unit: number) {
     this._gl.bindSampler(unit, this._sampler);
+  }
+
+  unbind(unit: number) {
+    this._gl.bindSampler(unit, null);
   }
 }

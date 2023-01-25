@@ -2,7 +2,6 @@
 
 precision highp float;
 
-uniform sampler2D jointTexture;
 uniform vec4 baseColorFactor;
 
 in vec3 Normal;
