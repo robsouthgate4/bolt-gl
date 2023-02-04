@@ -1,0 +1,46 @@
+{
+  "name": "bolt-gl",
+  "description": "Bolt WebGL library",
+  "version": "0.0.1",
+  "main": "build/cjs/index.js",
+  "module": "build/esm/index.js",
+  "types": "build/index.d.ts",
+  "type": "module",
+  "sideEffects": "false",
+  "files": [
+    "build"
+  ],
+  "homepage": "https://github.com/robsouthgate4/bolt-gl#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/robsouthgate4/bolt-gl.git"
+  },
+  "bugs": {
+    "url": "https://github.com/robsouthgate4/bolt-gl/issues"
+  },
+  "keywords": [
+    "webgl",
+    "webgl2"
+  ],
+  "scripts": {
+    "build": "rollup -c",
+    "prepublishOnly": "npm run build",
+    "lint": "NODE_ENV=test npm-run-all --parallel lint:*",
+    "lint:js": "eslint \"src/**/*.{js,jsx,ts,tsx}\"",
+    "lint:type-check": "tsc --noEmit",
+    "fix": "npm-run-all --sequential fix:*",
+    "fix:js": "eslint \"src/**/*.{js,jsx,ts,tsx}\" --fix",
+    "depcheck": "npx npm-check --update"
+  },
+  "author": "Robert Southgate (rob.southgate@phntms.com)",
+  "license": "MIT",
+  "peerDependencies": {
+    "gl-matrix": "^3.4.3"
+  },
+  "dependencies": {
+    "bolt-gl": "file:.yalc/bolt-gl",
+    "gl-matrix": "^3.4.3",
+    "p-map": "^5.5.0"
+  },
+  "yalcSig": "163a51442b785cfa33679d0990e0ea89"
+}

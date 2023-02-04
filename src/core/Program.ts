@@ -8,17 +8,19 @@ import {
   FRAGMENT_SHADER,
   LINK_STATUS,
   ONE_MINUS_SRC_ALPHA,
+  RGBA,
   SAMPLER_2D,
   SAMPLER_CUBE,
   SRC_ALPHA,
   VERTEX_SHADER,
 } from "./Constants";
 import Bolt from "./Bolt";
+import Texture2D from "./Texture2D";
+import { FLOAT, RGBA32f } from "bolt-gl";
 
 let ID = -1;
 
 export default class Program {
-  private _gl: WebGL2RenderingContext;
   private _vertexShader: WebGLShader;
   private _fragmentShader: WebGLShader;
   private _program: WebGLProgram;
@@ -35,6 +37,8 @@ export default class Program {
   private _cullFace?: number | undefined = undefined;
   private _id = ID;
   private _bolt: Bolt;
+  
+  protected _gl: WebGL2RenderingContext;
 
   constructor(
     vertexShaderSrc: string,
@@ -125,13 +129,16 @@ export default class Program {
       const location = this._gl.getUniformLocation(this._program, uniform.name);
       if (!location) continue;
 
-      if (uniform.type === SAMPLER_2D || uniform.type === SAMPLER_CUBE) {
+      if (uniform.type === this._gl.SAMPLER_2D || uniform.type === this._gl.SAMPLER_CUBE || uniform.type === this._gl.SAMPLER_3D) {
 
         textureUnit++;
 
+        const tempTexture = new Texture2D({width: 1, height: 1, type: FLOAT, format: RGBA, internalFormat: RGBA32f, generateMipmaps: false});
+        tempTexture.setFromData(new Float32Array([1, 1, 0, 1]), 1, 1);
+
         textureUniforms.push({
           name: uniformName,
-          value: undefined,
+          value: tempTexture,
           type: uniform.type,
           location,
           textureUnit
@@ -266,16 +273,19 @@ export default class Program {
   }
 
   activate() {
-    if(this._bolt.activeProgram === this) return;
+    if(this._bolt.activeProgram === this._id) return;
     this._gl.useProgram(this._program);
-    this._bolt.activeProgram = this;
+    this._bolt.activeProgram = this._id;
   }
 
   use() {
     Object.values(this._uniforms).forEach((uniform) => {
       if(uniform.value instanceof Texture) {
           const texture = uniform.value;
-          texture.bind(uniform.textureUnit);
+          if(this._bolt.activeTextureUnit !== texture.id) {
+            texture.bind(uniform.textureUnit);
+            this._bolt.activeTextureUnit = texture.id;
+          }
       }
     });
   }

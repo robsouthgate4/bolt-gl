@@ -9,7 +9,7 @@ import {
 import { TypedArray } from "./Types";
 
 export default class Texture2D extends Texture {
-  private _image!: HTMLImageElement;
+  private _image: HTMLImageElement | undefined;
   private _data: TypedArray | undefined;
 
   constructor({
@@ -65,51 +65,82 @@ export default class Texture2D extends Texture {
     );
 
     this.applySettings();
-
-    this.unbind();
   }
 
   resize(width: number, height: number) {
+    
+    this._width = width;
+    this._height = height;
+    
     this.bind();
-    this._gl.texImage2D(
-      TEXTURE_2D,
-      0,
-      this._internalFormat,
-      width,
-      height,
-      0,
-      this._format,
-      this._type,
-      this._data || null
-    );
-    this.unbind();
+
+    if( this._data ) {
+      this._gl.texSubImage2D(
+        TEXTURE_2D,
+        0,
+        0, 
+        0,
+        this.width,
+        this.height,
+        this._format,
+        this._type,
+        this._data
+      );
+    }
+
+    if( this._image ) {
+
+      this._gl.texImage2D(
+        TEXTURE_2D,
+        0,
+        this._format,
+        this._format,
+        this._pixelType,
+        this._image
+      );
+    }
+
+    if(!this._data && !this._image) {
+      this._gl.texImage2D(
+        TEXTURE_2D,
+        0,
+        this._internalFormat,
+        this.width,
+        this.height,
+        0,
+        this._format,
+        this._type,
+        null
+      );
+    }
+    
   }
 
   setFromData(
-    data: Float32Array | Uint16Array | Uint8Array,
+    data: TypedArray,
     width: number,
     height: number
   ) {
+
+    this._width = width;
+    this._height = height;
+    this._data = data;
+    
     this.bind();
 
-    this._gl.texImage2D(
+    this._gl.texSubImage2D(
       TEXTURE_2D,
       0,
-      this._internalFormat,
-      width,
-      height,
+      0, 
       0,
+      this.width,
+      this.height,
       this._format,
       this._type,
       data
     );
 
-    this._width = width;
-    this._height = height;
-    this._data = data;
-
     this.applySettings();
-    this.unbind();
     
   }
 
@@ -146,7 +177,7 @@ export default class Texture2D extends Texture {
     });
   }
 
-  public get image(): HTMLImageElement {
+  public get image(): HTMLImageElement | undefined {
     return this._image;
   }
 }

@@ -1,0 +1,9 @@
+{
+  "version": "v1",
+  "packages": {
+    "bolt-gl": {
+      "signature": "163a51442b785cfa33679d0990e0ea89",
+      "file": true
+    }
+  }
+}

@@ -972,6 +972,7 @@ export default class GLTFLoader {
             ds.forEach((drawset?: DrawSet) => {
               const mesh = drawset!.mesh as SkinMesh;
               mesh.skin = skin;
+              mesh.createTexture(skin);
               drawset?.setParent(this._nodes[nodeIndex].node);
             });
           }
@@ -1109,6 +1110,8 @@ export default class GLTFLoader {
     const n = new Node();
     n.name = name;
     n.transform = trs;
+    
+    node.skin = skin;
 
     return {
       id: index,
@@ -1365,7 +1368,6 @@ export default class GLTFLoader {
       // program.setTexture( "mapRadiance", this._radianceMap );
       // program.setTexture( "mapIrradiance", this._irradianceMap );
 
-      console.log(baseColorFactor);
       program.activate();
       //program.setTexture("jointTexture", t, 0);
       // if (baseColorTexture !== undefined) {

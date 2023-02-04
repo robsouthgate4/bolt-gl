@@ -191,17 +191,13 @@ export default class DrawState {
 
   draw() {
 
-    // if (this._fbo) {
-    //   this._fbo.bind();
-    // }
-
-    // this._viewport &&
-    //   this._bolt.setViewPort(
-    //     this._viewport.offsetX,
-    //     this._viewport.offsetY,
-    //     this._viewport.width,
-    //     this._viewport.height
-    //   );
+    this._viewport &&
+      this._bolt.setViewPort(
+        this._viewport.offsetX,
+        this._viewport.offsetY,
+        this._viewport.width,
+        this._viewport.height
+      );
 
     this._clearColor &&
       this._bolt.clear(
@@ -214,6 +210,8 @@ export default class DrawState {
     if (this._cullFace !== NONE) {
       this._bolt.enableCullFace();
       this._bolt.cullFace(this._cullFace);
+    } else {
+      this._bolt.disableCullFace();
     }
 
     if (this._drawSet !== undefined) {
@@ -221,14 +219,6 @@ export default class DrawState {
     } else if( this._node !== undefined) {
       this._bolt.draw(this._node);
     }
-
-    // if (this._fbo) {
-    //   this._fbo.unbind();
-    // }
-
-    // if (this._cullFace !== NONE) {
-    //   this._bolt.disableCullFace();
-    // }
 
     return this;
   }

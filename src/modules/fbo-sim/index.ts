@@ -68,7 +68,7 @@ export default class FBOSim {
     this._throughProgram.setTexture("map", texture);
     texture.bind(0);
     this._drawSetblit.program = this._throughProgram;
-    this._bolt.clear(0, 0, 0, 1);
+    this._bolt.clear(0, 0, 0, 0);
     this._bolt.draw(this._drawSetblit);
     fbo.unbind();
   }
@@ -145,7 +145,7 @@ export default class FBOSim {
         );
       }
 
-      this._bolt.clear(0, 0, 0, 1);
+      this._bolt.clear(0, 0, 0, 0);
 
       if (program) {
         this._drawSetblit.program = program;
@@ -160,7 +160,7 @@ export default class FBOSim {
     if (this._outputToScreen) {
       //console.log("output to screen");
       const pass1 = this._FBOSwapDefinitions[0];
-      this._bolt.setViewPort(0, 0, pass1.read.width * 3, pass1.read.height * 3);
+      this._bolt.setViewPort(0, 0, pass1.read.width * 10, pass1.read.height * 10);
       this._bolt.clear(0, 0, 0, 1);
       this._outProgram.activate();
       this._outProgram.setTexture("map", pass1.read.targetTexture);

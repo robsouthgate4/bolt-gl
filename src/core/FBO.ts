@@ -17,6 +17,7 @@ import {
   RGBA,
 } from "./Constants";
 import Bolt from "./Bolt";
+import RBO from "./RBO";
 
 export default class FBO {
   private _width = 256;
@@ -36,6 +37,7 @@ export default class FBO {
   private _msaaColorRenderBuffer!: WebGLRenderbuffer | null;
   private _msaaDepthBuffer!: WebGLRenderbuffer | null;
   private _name: string;
+  private _rbo: RBO | undefined;
 
   constructor({
     width = 256,
@@ -87,6 +89,9 @@ export default class FBO {
        */
       if (depth) {
         this.attachDepthTexture();
+      } else {
+        // if not depth texture, attach a render buffer
+        this.attachRBO();
       }
 
       this.unbind();
@@ -112,9 +117,17 @@ export default class FBO {
       if (depth) {
         this.attachDepthTexture();
       }
+      else {
+        // if not depth texture, attach a render buffer
+        this.attachRBO();
+      }
 
       this.unbind();
+
     }
+    this._gl.bindTexture(TEXTURE_2D, null);
+
+    this.clear();
   }
 
   private initMSAA() {
@@ -209,6 +222,24 @@ export default class FBO {
     );
   }
 
+  private attachRBO() {
+    this._rbo = new RBO({
+      width: this._width,
+      height: this._height,
+    });
+
+    this.bind();
+    this._rbo.bind();
+    this.unbind();
+    this._rbo.unbind();
+  }
+
+  clear (r = 0, g = 0, b = 0, a = 0) {
+    this.bind()
+    this._bolt.clear(r, g, b, a)
+    this.unbind()
+  }
+
   /**
    * Add an attachment to the framebuffer ( multi render targets )
    * @param  {Texture2D} texture
@@ -225,7 +256,6 @@ export default class FBO {
       0
     );
     texture.unbind();
-
     this._attachmentIds.push(id);
     this._attachmentTextures.push(texture);
   }
@@ -248,6 +278,10 @@ export default class FBO {
 
     if (this._depth && this._depthTexture) {
       this._depthTexture.resize(width, height);
+    }
+
+    if(this._rbo) {
+      this._rbo.resize(width, height);
     }
 
     this._attachmentTextures.forEach((attachment: Texture2D) => {

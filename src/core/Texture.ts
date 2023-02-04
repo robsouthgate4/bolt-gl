@@ -37,6 +37,7 @@ export default abstract class Texture {
   protected _currentUnit = -1;
 
   private _id: number;
+  private _bolt = Bolt.getInstance();
 
   constructor({
     imagePath = "",
@@ -57,7 +58,7 @@ export default abstract class Texture {
   } = {}) {
     this._id = ID++;
 
-    this._gl = Bolt.getInstance().getContext();
+    this._gl = this._bolt.getContext();
     this._width = width;
     this._height = height;
     this._depthAttachment = depthAttachment;
@@ -95,11 +96,10 @@ export default abstract class Texture {
 
   bind(index?: number | undefined) {
 
-    if (index !== undefined) {
-      this._gl.activeTexture(TEXTURE0 + index);
-    }
-
+    if(this._bolt.boundTexture === this._id) return;
+    this._gl.activeTexture(TEXTURE0 + (index || 0));
     this._gl.bindTexture(this._target, this._texture);
+    this._bolt.boundTexture = this._id;
   }
 
   unbind() {

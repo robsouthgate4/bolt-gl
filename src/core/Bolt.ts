@@ -19,7 +19,6 @@ import {
   SRC_ALPHA,
 } from "./Constants";
 import Camera from "./Camera";
-import Texture from "./Texture";
 
 export default class Bolt {
   private static _instance: Bolt;
@@ -31,9 +30,9 @@ export default class Bolt {
   private _sortVec3 = vec3.create();
   private _transparentNodes: DrawSet[] = [];
   private _opaqueNodes: DrawSet[] = [];
-  private _activePrograms: Program[] = [];
-  private _activeProgram!: Program;
+  private _activeProgram = -1;
   private _activeTextureUnit = -1;
+  private _boundTexture = -1;
   
   static getInstance(): Bolt {
     if (!Bolt._instance) Bolt._instance = new Bolt();
@@ -245,7 +244,7 @@ export default class Bolt {
   /**
    * Trigger a depth sort of opaque and transparent nodes
    */
-  private forceDepthSort() {
+  public forceDepthSort() {
     this.sortByDepth(this._opaqueNodes);
     this.sortByDepth(this._transparentNodes);
   }
@@ -267,15 +266,23 @@ export default class Bolt {
         if (!node.mesh.vao) return;
 
         const { program } = node;
+        
+        program.activate();
         program.use();
 
         node.updateMatrices(program, this._camera);
 
         // set the current blend mode for bound shader
-        this._gl.blendFunc(
-          program.blendFunction.src,
-          program.blendFunction.dst
-        );
+
+        if(program.transparent === true) {
+          this.enableAlpha();
+          this._gl.blendFunc(
+            program.blendFunction.src,
+            program.blendFunction.dst
+          );
+        } else {
+          this.disableAlpha();
+        }
 
         if (program.cullFace !== undefined) {
           if (program.cullFace === NONE) {
@@ -287,13 +294,12 @@ export default class Bolt {
         }
         
         // skin meshes require node reference to update skin matrices
-        if (node.mesh.isSkinMesh !== undefined) {
+        if (node.mesh.isSkinMesh) {
           node.mesh.draw(program, node);
         } else {
           node.mesh.draw(program);
         }
-
-        this._activeProgram = program;
+        
       }
     };
 
@@ -354,8 +360,8 @@ export default class Bolt {
     this._autoSort = value;
   }
 
-  public set activeProgram(program: Program) {
-    this._activeProgram = program;
+  public set activeProgram(id: number) {
+    this._activeProgram = id;
   }
 
   public get activeProgram() {
@@ -368,6 +374,14 @@ export default class Bolt {
   
   public set activeTextureUnit(value) {
     this._activeTextureUnit = value;
+  }
+
+  public get boundTexture() {
+    return this._boundTexture;
+  }
+  
+  public set boundTexture(value) {
+    this._boundTexture = value;
   }
 
 }

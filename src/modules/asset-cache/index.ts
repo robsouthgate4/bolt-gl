@@ -38,7 +38,6 @@ export default class AssetCache {
   private _logs: any[] = [];
   private _debug = false;
   private _bolt = Bolt.getInstance();
-  private _gltfLoader: GLTFLoader;
 
   static getInstance() {
     if (!AssetCache._instance) AssetCache._instance = new AssetCache();
@@ -57,7 +56,6 @@ export default class AssetCache {
         });
       });
     }
-    this._gltfLoader = new GLTFLoader(this._bolt, false);
   }
 
   addProgressListener(fn) {
@@ -203,8 +201,9 @@ export default class AssetCache {
 
     switch (type) {
       case AssetType.GLTF:
-        const gltfNode = await this._gltfLoader.load(url);
-        return { scene: gltfNode, loader: this._gltfLoader };
+        const loader = new GLTFLoader(this._bolt, false);
+        const gltfNode = await loader.load(url);
+        return { scene: gltfNode, loader: loader };
       case AssetType.TEXTURE:
         const texture = new Texture2D({
           imagePath: url,
