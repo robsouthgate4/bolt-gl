@@ -21,7 +21,7 @@ import {
   UNSIGNED_SHORT,
   INT,
   UNSIGNED_INT,
-} from "bolt-gl";
+} from "bolt-wgpu";
 
 import SkinMesh from "./SkinMesh";
 import Skin from "./Skin";
@@ -29,7 +29,8 @@ import skinVertexShader from "./shaders/skin/skin.vert";
 import skinFragmentShader from "./shaders/skin/skin.frag";
 import vertexShader from "./shaders/color/color.vert";
 import fragmentShader from "./shaders/color/color.frag";
-import { DracoDecoder } from "./draco-decoder";
+import { DracoDecoder } from "../libs/draco-decoder";
+import { Renderer } from "../../core/Types";
 
 export type TypedArray =
   | Int8ArrayConstructor
@@ -827,7 +828,7 @@ export default class GLTFLoader {
   private _flattenHierarchy: boolean;
   private _drawSetsFlattened: DrawSet[];
 
-  constructor(bolt: Bolt, flattenHierarchy = false) {
+  constructor(bolt: Renderer, flattenHierarchy = false) {
     // this._irradianceMap = environmentMaps.irradianceMap || undefined;
     // this._radianceMap = environmentMaps.radianceMap || undefined;
 
@@ -1110,7 +1111,7 @@ export default class GLTFLoader {
     const n = new Node();
     n.name = name;
     n.transform = trs;
-    
+
     node.skin = skin;
 
     return {
@@ -1199,7 +1200,11 @@ export default class GLTFLoader {
           const prog =
             this._materials && primitive.material !== undefined
               ? this._materials[primitive.material as number]
-              : new Program(vertexShader, fragmentShader);
+              : new Program(this.bolt, {
+                  vertexShaderSrc: vertexShader,
+                  fragmentShaderSrc: fragmentShader,
+                  uniforms: {},
+                });
 
           if (node && node.skin !== undefined) {
             console.log("skinned mesh detected");
@@ -1299,7 +1304,11 @@ export default class GLTFLoader {
           const prog =
             this._materials && primitive.material !== undefined
               ? this._materials[primitive.material as number]
-              : new Program(vertexShader, fragmentShader);
+              : new Program(this.bolt, {
+                  vertexShaderSrc: vertexShader,
+                  fragmentShaderSrc: fragmentShader,
+                  uniforms: {},
+                });
 
           if (node && node.skin !== undefined) {
             console.log("skinned mesh detected");
@@ -1343,8 +1352,16 @@ export default class GLTFLoader {
 
     // get the program for this material
     const program = hasSkin
-      ? new Program(skinVertexShader, skinFragmentShader)
-      : new Program(vertexShader, fragmentShader);
+      ? new Program(this._bolt, {
+          vertexShaderSrc: skinVertexShader,
+          fragmentShaderSrc: skinFragmentShader,
+          uniforms: {},
+        })
+      : new Program(this._bolt, {
+          vertexShaderSrc: vertexShader,
+          fragmentShaderSrc: fragmentShader,
+          uniforms: {},
+        });
 
     program.name = material.name;
 

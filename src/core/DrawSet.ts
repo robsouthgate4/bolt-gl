@@ -1,6 +1,8 @@
 import Program from "./Program";
 import Node from "./Node";
 import Mesh from "./Mesh";
+import ProgramWebgpu from "./webgpu/ProgramWebgpu";
+import GeometryRendererWebgpu from "./webgpu/GeometryRendererWebgpu";
 
 export default class DrawSet extends Node {
   private _program: Program;
@@ -15,6 +17,14 @@ export default class DrawSet extends Node {
     super();
     this._mesh = mesh;
     this._program = program;
+
+    // webgpu program pipeline requires mesh geometry renderer for creating pipeline
+    // if (this.program.programRenderer instanceof ProgramWebgpu) {
+    //   const program = this.program.programRenderer as ProgramWebgpu;
+    //   const geometryRenderer = this._mesh
+    //     .geometryRenderer as GeometryRendererWebgpu;
+    //   program.createPipeline(geometryRenderer);
+    // }
   }
 
   public get program(): Program {

@@ -1,9 +1,9 @@
-import { DrawSet, LINES, Mesh, Program } from "../../../";
+import { DrawSet, LINES, Mesh, Program, Renderer } from "../../../";
 import vertexShader from "./shaders/axis.vert";
 import fragmentShader from "./shaders/axis.frag";
 
 export default class Floor extends DrawSet {
-  constructor() {
+  constructor(bolt: Renderer) {
     const dimensions = 20;
     const lines = (2 * dimensions) / 5;
 
@@ -34,12 +34,16 @@ export default class Floor extends DrawSet {
       indices[2 * (lines + 1) + 2 * l + 1] = 2 * (lines + 1) + 2 * l + 1;
     }
 
-    const mesh = new Mesh({
+    const mesh = new Mesh(bolt, {
       positions,
       indices,
     }).setDrawType(LINES);
 
-    const program = new Program(vertexShader, fragmentShader);
+    const program = new Program(bolt, {
+      vertexShaderSrc: vertexShader,
+      fragmentShaderSrc: fragmentShader,
+      uniforms: {},
+    });
 
     super(mesh, program);
   }

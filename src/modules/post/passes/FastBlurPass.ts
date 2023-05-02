@@ -52,10 +52,11 @@ export default class FastBlurPass extends Pass {
     this._iterations = iterations;
 
     this.requiresSwap = false;
-    this.program = new Program(
-      vertexShader,
-      customBlurShader || fragmentShader
-    );
+    this.program = new Program(bolt, {
+      vertexShaderSrc: vertexShader,
+      fragmentShaderSrc: customBlurShader || fragmentShader,
+      uniforms: {},
+    });
   }
 
   resize(width: number, height: number): void {

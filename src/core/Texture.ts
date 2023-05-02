@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+//@ts-nocheck
+
 import { TypedArray } from "./Types";
 import {
   CLAMP_TO_EDGE,
@@ -10,8 +13,8 @@ import {
   TEXTURE_WRAP_S,
   TEXTURE_WRAP_T,
   UNSIGNED_BYTE,
-} from "./Constants";
-import Bolt from "./Bolt";
+} from "./webgl/Constants";
+import Bolt from "./webgl/Bolt";
 
 let ID = 0;
 
@@ -95,8 +98,7 @@ export default abstract class Texture {
   load?(): void;
 
   bind(index?: number | undefined) {
-
-    if(this._bolt.boundTexture === this._id) return;
+    if (this._bolt.boundTexture === this._id) return;
     this._gl.activeTexture(TEXTURE0 + (index || 0));
     this._gl.bindTexture(this._target, this._texture);
     this._bolt.boundTexture = this._id;
@@ -115,7 +117,6 @@ export default abstract class Texture {
   }
 
   protected applySettings() {
-
     this._gl.pixelStorei(this._gl.UNPACK_FLIP_Y_WEBGL, this._flipY);
     this._gl.texParameteri(this._target, TEXTURE_WRAP_S, this._wrapS);
     this._gl.texParameteri(this._target, TEXTURE_WRAP_T, this._wrapT);
@@ -251,5 +252,4 @@ export default abstract class Texture {
   public set currentUnit(value: number) {
     this._currentUnit = value;
   }
-
 }

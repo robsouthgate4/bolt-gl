@@ -1,4 +1,4 @@
-import { Bolt, FBO, Mesh, Program, Texture2D } from "../../../";
+import { Bolt, FBO, Mesh, Program, Renderer, Texture2D } from "../../../";
 export abstract class Pass {
   private _fullScreenTriangle!: Mesh;
   private _renderToScreen = false;
@@ -7,21 +7,21 @@ export abstract class Pass {
   protected _texture: Texture2D | undefined;
   protected _width: number;
   protected _height: number;
-  protected _bolt: Bolt;
+  protected _bolt: Renderer;
 
   public _hasCustomFBO = false;
   public fbo?: FBO;
   public requiresSwap = true;
 
   constructor(
-    bolt: Bolt,
+    bolt: Renderer,
     { texture }: { width: number; height: number; texture?: Texture2D }
   ) {
     const triangleVertices = [-1, -1, 0, -1, 4, 0, 4, -1, 0];
 
     const triangleIndices = [2, 1, 0];
 
-    this.fullScreenTriangle = new Mesh({
+    this.fullScreenTriangle = new Mesh(bolt, {
       positions: triangleVertices,
       indices: triangleIndices,
     });

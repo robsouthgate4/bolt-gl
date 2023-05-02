@@ -3,6 +3,8 @@ import { mat2, mat3, mat4, vec2, vec3, vec4 } from "gl-matrix";
 import TextureCube from "./TextureCube";
 import Texture from "./Texture";
 import Program from "./Program";
+import Bolt from "./webgl/Bolt";
+import BoltWGPU from "./webgpu/BoltWGPU";
 
 export interface BoltParams {
   antialias?: boolean;
@@ -42,7 +44,10 @@ export type UniformType =
   | mat4
   | Texture
   | TextureCube
+  | TypedArray
   | undefined;
+
+export type Renderer = Bolt | BoltWGPU;
 
 export interface AttribPointer {
   attributeName: string;
@@ -82,16 +87,38 @@ export interface TextureObject {
 }
 
 export interface Uniform {
-  location: WebGLUniformLocation | null;
+  location: WebGLUniformLocation | undefined;
   value: UniformType;
   textureUnit?: number;
+}
+
+export interface UniformWgpu {
+  values: { [key: string]: UniformType };
+  bindGroupID: number;
+}
+
+export interface UniformParam {
+  name: string;
+  value: UniformType;
+}
+export interface UniformParams {
+  [key: string]: UniformParam;
 }
 
 export interface UniformObject {
   [key: string]: Uniform;
 }
 
+export interface UniformObjectWgpu {
+  [key: string]: UniformWgpu;
+}
+
 export interface BlendOptions {
   src: number;
   dst: number;
+}
+
+export enum RendererType {
+  WEBGL = "webgl",
+  WEBGPU = "webgpu",
 }

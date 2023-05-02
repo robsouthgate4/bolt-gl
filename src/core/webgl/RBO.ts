@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+//@ts-nocheck
+
 import {
   DEPTH_STENCIL,
   DEPTH_STENCIL_ATTACHMENT,

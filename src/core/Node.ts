@@ -22,7 +22,6 @@ export default class Node {
   private _inverseModelViewMatrix: mat4;
   private _draw: boolean;
   private _cameraDepth!: number;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private _abstractData: any = {};
   private _isJoint = false;
 
@@ -112,40 +111,6 @@ export default class Node {
   }
 
   /**
-   * Updates each node's model matrix
-   * Set's projection, view and model matrix uniforms of given program
-   * @param  {Program} program
-   * @param  {Camera} camera
-   */
-  updateMatrices(program: Program, camera: Camera) {
-    program.activate();
-
-    program.uniforms["projection"] &&
-      program.setMatrix4("projection", camera.projection);
-
-    program.uniforms["view"] && program.setMatrix4("view", camera.view);
-
-    program.uniforms["model"] && program.setMatrix4("model", this._modelMatrix);
-
-    // Generate normal matrix
-    mat4.multiply(this._modelViewMatrix, camera.view, this._modelMatrix);
-
-    program.uniforms["modelView"] &&
-      program.setMatrix4("modelView", this._modelViewMatrix);
-
-    mat4.invert(this._inverseModelViewMatrix, this._modelViewMatrix);
-
-    program.uniforms["modelViewInverse"] &&
-      program.setMatrix4("modelViewInverse", this._inverseModelViewMatrix);
-
-    mat4.transpose(this._normalMatrix, this._inverseModelViewMatrix);
-
-    program.uniforms["normal"] &&
-      program.setMatrix4("normal", this._normalMatrix);
-
-    this.updateModelMatrix();
-  }
-  /**
    * Returns the world matrix relative to this nodes parent
    * @returns mat4
    */
@@ -176,6 +141,29 @@ export default class Node {
 
   public set modelMatrix(value: mat4) {
     this._modelMatrix = value;
+  }
+
+  public get modelViewMatrix(): mat4 {
+    return this._modelViewMatrix;
+  }
+
+  public set modelViewMatrix(value: mat4) {
+    this._modelViewMatrix = value;
+  }
+
+  public get normalMatrix(): mat4 {
+    return this._normalMatrix;
+  }
+
+  public set normalMatrix(value: mat4) {
+    this._normalMatrix = value;
+  }
+
+  public get inverseModelViewMatrix(): mat4 {
+    return this._inverseModelViewMatrix;
+  }
+  public set inverseModelViewMatrix(value: mat4) {
+    this._inverseModelViewMatrix = value;
   }
 
   public get localMatrix(): mat4 {

@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+//@ts-nocheck
+
 import Texture from "./Texture";
 import {
   CLAMP_TO_EDGE,
@@ -11,7 +14,7 @@ import {
   TEXTURE_CUBE_MAP_POSITIVE_Y,
   TEXTURE_CUBE_MAP_POSITIVE_Z,
   UNSIGNED_BYTE,
-} from "./Constants";
+} from "./webgl/Constants";
 
 interface FileParams {
   [key: string]: string;

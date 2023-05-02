@@ -1,5 +1,5 @@
-import Bolt from "./Bolt";
-import { CLAMP_TO_EDGE, LEQUAL, LINEAR, NONE } from "./Constants";
+import Bolt from "./webgl/Bolt";
+import { CLAMP_TO_EDGE, LEQUAL, LINEAR, NONE } from "./webgl/Constants";
 
 export default class TextureSampler {
   private _bolt = Bolt.getInstance();

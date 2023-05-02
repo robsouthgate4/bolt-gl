@@ -31,6 +31,6 @@ npm i @bolt-webgl/core
 [npm-url]: https://npmjs.org/package/@bolt-webgl/core
 [npm-downloads-image]: https://img.shields.io/npm/dm/@bolt-webgl/core.svg
 [npm-downloads-url]: https://npmcharts.com/compare/@bolt-webgl/core?minimal=true
-[ci-image]: https://github.com/robsouthgate4/bolt-gl/workflows/Test/badge.svg
-[ci-url]: https://github.com/robsouthgate4/bolt-gl/actions-->
+[ci-image]: https://github.com/robsouthgate4/bolt-wgpu/workflows/Test/badge.svg
+[ci-url]: https://github.com/robsouthgate4/bolt-wgpu/actions-->
 

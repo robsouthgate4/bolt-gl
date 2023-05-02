@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+//@ts-nocheck
+
 import { mat4, vec2, vec4 } from "gl-matrix";
 
 import {
@@ -53,7 +56,11 @@ export default class GPUPicker {
     this._fbo.unbind();
     this._rbo.unbind();
 
-    this._pickingProgram = new Program(vertexShader, fragmentShader);
+    this._pickingProgram = new Program(bolt, {
+      vertexShaderSrc: vertexShader,
+      fragmentShaderSrc: fragmentShader,
+      uniforms: {},
+    });
   }
 
   _getPickedID(mouse: vec2) {

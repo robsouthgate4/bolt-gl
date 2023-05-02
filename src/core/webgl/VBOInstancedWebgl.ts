@@ -3,7 +3,7 @@ import { mat4 } from "gl-matrix";
 import { ARRAY_BUFFER, STATIC_DRAW } from "./Constants";
 import Bolt from "./Bolt";
 
-export default class VBOInstanced {
+export default class VBOInstancedWebgl {
   private _gl: WebGL2RenderingContext;
   private _buffer: WebGLBuffer;
 

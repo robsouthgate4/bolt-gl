@@ -4,25 +4,15 @@ Bolt renderer
 
 import { vec2, vec3 } from "gl-matrix";
 
-import { BoltParams, Viewport } from "./Types";
-import Program from "./Program";
-import Node from "./Node";
-import DrawSet from "./DrawSet";
-import {
-  BACK,
-  BLEND,
-  CULL_FACE,
-  DEPTH_TEST,
-  NONE,
-  ONE,
-  ONE_MINUS_SRC_ALPHA,
-  SRC_ALPHA,
-} from "./Constants";
-import Camera from "./Camera";
+import { BoltParams, RendererType, Viewport } from "../Types";
+import Node from "../Node";
+import DrawSet from "../DrawSet";
+import { NONE } from "../webgl/Constants";
+import Camera from "../Camera";
 
-export default class Bolt {
-  private static _instance: Bolt;
-  private _gl!: WebGL2RenderingContext;
+export default class BoltWGPU {
+  private static _instance: BoltWGPU;
+  private _context!: GPUCanvasContext;
   private _camera!: Camera;
   private _dpi!: number;
   private _viewport!: Viewport;
@@ -33,10 +23,20 @@ export default class Bolt {
   private _activeProgram = -1;
   private _activeTextureUnit = -1;
   private _boundTexture = -1;
-  
-  static getInstance(): Bolt {
-    if (!Bolt._instance) Bolt._instance = new Bolt();
-    return Bolt._instance;
+  private _canvas!: HTMLCanvasElement;
+  private _device: GPUDevice | undefined;
+
+  public rendererType = RendererType.WEBGPU;
+  private _presentationFormat!: GPUTextureFormat;
+  private _renderPassDescriptor!: GPURenderPassDescriptor;
+  private _renderTarget!: GPUTexture;
+  private _depthTexture!: GPUTexture;
+  private _renderTargetView!: GPUTextureView;
+  private _depthTextureView!: GPUTextureView;
+
+  static getInstance(): BoltWGPU {
+    if (!BoltWGPU._instance) BoltWGPU._instance = new BoltWGPU();
+    return BoltWGPU._instance;
   }
 
   /**
@@ -44,7 +44,7 @@ export default class Bolt {
    * @param  {HTMLCanvasElement} canvas html canvas element
    * @param  {BoltParams} {antialias} context params, antialias and DPI ( default 1 )
    */
-  init(
+  async init(
     canvas: HTMLCanvasElement,
     {
       antialias = false,
@@ -56,26 +56,43 @@ export default class Bolt {
       preserveDrawingBuffer = false,
     }: BoltParams
   ) {
-    this._gl = <WebGL2RenderingContext>canvas.getContext("webgl2", {
-      antialias,
-      dpi,
-      powerPreference,
-      alpha,
-      premultipliedAlpha,
-      stencil,
-      preserveDrawingBuffer,
+    this._canvas = canvas;
+    const adapter = await navigator.gpu.requestAdapter();
+
+    if (!adapter) throw new Error("WebGPU not supported in this browser");
+
+    this._device = await adapter.requestDevice();
+    this._context = <GPUCanvasContext>canvas.getContext("webgpu");
+
+    this._presentationFormat = await navigator.gpu.getPreferredCanvasFormat();
+
+    this._context.configure({
+      device: this._device,
+      format: this._presentationFormat,
+      alphaMode: "opaque",
     });
 
-    this._gl.pixelStorei(this._gl.UNPACK_FLIP_Y_WEBGL, false);
+    this._renderTarget = this._device.createTexture({
+      size: [canvas.width, canvas.height],
+      sampleCount: 4,
+      format: this._presentationFormat,
+      usage: GPUTextureUsage.RENDER_ATTACHMENT,
+    });
+
+    this._renderTargetView = this._renderTarget.createView();
+
+    this._depthTexture = this._device.createTexture({
+      size: [canvas.width, canvas.height],
+      sampleCount: 4,
+      format: "depth24plus",
+      usage: GPUTextureUsage.RENDER_ATTACHMENT,
+    });
+
+    this._depthTextureView = this._depthTexture.createView();
 
     this.printBanner();
-
     this._dpi = dpi;
 
-    this.enableDepth();
-    this.enableAlpha();
-    this.enableCullFace();
-    this.cullFace(BACK);
     this.resizeCanvasToDisplay();
   }
 
@@ -89,7 +106,7 @@ export default class Bolt {
     ].join(";");
 
     console.log(
-      `%c WebGL rendered with Bolt by RS CREATIVE STUDIO \u26a1 \u26a1`,
+      `%c WebGPU rendered with Bolt by RS CREATIVE STUDIO \u26a1 \u26a1`,
       style
     );
   }
@@ -102,13 +119,11 @@ export default class Bolt {
    * @param  {number} a alpha
    */
   clear(r: number, g: number, b: number, a: number) {
-    this._gl.clearColor(r, g, b, a);
-    //this._gl.colorMask( false, false, false, true );
-    this._gl.clear(this._gl.COLOR_BUFFER_BIT | this._gl.DEPTH_BUFFER_BIT);
+    return;
   }
 
   scissor(x: number, y: number, w: number, h: number) {
-    this._gl.scissor(x, y, w, h);
+    return;
   }
 
   /**
@@ -119,8 +134,7 @@ export default class Bolt {
    * @param  {number} height height of the viewport
    */
   setViewPort(x: number, y: number, width: number, height: number) {
-    this._gl.viewport(x, y, width, height);
-    this._viewport = { offsetX: x, offsetY: y, width, height };
+    return;
   }
 
   /**
@@ -136,63 +150,63 @@ export default class Bolt {
   }
 
   enableAlpha() {
-    this._gl.enable(BLEND);
+    return;
   }
 
   disableAlpha() {
-    this._gl.disable(BLEND);
+    return;
   }
 
   enableDepth() {
-    this._gl.enable(DEPTH_TEST);
+    return;
   }
 
   disableDepth() {
-    this._gl.disable(DEPTH_TEST);
+    return;
   }
 
   enableCullFace() {
-    this._gl.enable(CULL_FACE);
+    return;
   }
 
   disableCullFace() {
-    this._gl.disable(CULL_FACE);
+    return;
   }
 
   /**
    * @param  {number} face face to cull
    */
   cullFace(face: number) {
-    this._gl.cullFace(face);
+    return;
   }
 
   enableAlphaBlending() {
-    this._gl.blendFunc(SRC_ALPHA, ONE_MINUS_SRC_ALPHA);
+    return;
   }
 
   enableAdditiveBlending() {
-    this._gl.blendFunc(ONE, ONE);
+    return;
   }
 
   /**
    * enable scissor test
    */
   enableScissor() {
-    this._gl.enable(this._gl.SCISSOR_TEST);
+    return;
   }
 
   /**
    * disable scissor test
    */
   disableScissor() {
-    this._gl.disable(this._gl.SCISSOR_TEST);
+    return;
   }
 
   /**
    * Returns gl context
    */
   getContext() {
-    return this._gl;
+    return this._context;
   }
 
   /**
@@ -200,7 +214,7 @@ export default class Bolt {
    * Updates the currently bound camera perspective
    */
   resizeCanvasToDisplay(canvas?: HTMLCanvasElement) {
-    const c = canvas || (this._gl.canvas as HTMLCanvasElement);
+    const c = canvas || (this._canvas as HTMLCanvasElement);
 
     const displayWidth = c.clientWidth * this._dpi;
     const displayHeight = c.clientHeight * this._dpi;
@@ -208,17 +222,22 @@ export default class Bolt {
     // Check if the this.gl.canvas is not the same size.
     const needResize = c.width !== displayWidth || c.height !== displayHeight;
 
-    if (needResize) {
+    if (
+      needResize &&
+      this._device &&
+      this._presentationFormat &&
+      this._renderTarget
+    ) {
       c.width = displayWidth;
       c.height = displayHeight;
     }
   }
 
   resizeCanvasToSize(size: vec2) {
+    if (!this._canvas) return;
     const dpi = this._dpi;
-
-    this._gl.canvas.width = size[0] * dpi;
-    this._gl.canvas.height = size[1] * dpi;
+    this._canvas.width = size[0] * dpi;
+    this._canvas.height = size[1] * dpi;
   }
 
   /**
@@ -256,50 +275,72 @@ export default class Bolt {
     this._camera.update();
 
     const render = (node: Node) => {
-      if (node.parent && !node.parent.draw) return;
+      if (!this._device) return;
 
       if (!node.draw) return;
+      if (node.parent && !node.parent.draw) return;
 
       // if node is a batch then render the mesh and update shader matrices
       if (node instanceof DrawSet) {
-        // only draw if mesh has a valid vao
-        if (!node.mesh.vao) return;
-
         const { program } = node;
-        
-        program.activate();
-        program.use();
 
-        node.updateMatrices(program, this._camera);
+        program.updateMatrices(node, this._camera);
 
-        // set the current blend mode for bound shader
-
-        if(program.transparent === true) {
-          this.enableAlpha();
-          this._gl.blendFunc(
-            program.blendFunction.src,
-            program.blendFunction.dst
-          );
-        } else {
-          this.disableAlpha();
+        if (
+          this._renderTarget?.width !== this._canvas.width ||
+          this._renderTarget?.height !== this._canvas.height
+        ) {
+          this._renderTarget?.destroy();
+          this._renderTarget = this._device.createTexture({
+            size: [this._canvas.width, this._canvas.height],
+            sampleCount: 4,
+            format: this._presentationFormat,
+            usage: GPUTextureUsage.RENDER_ATTACHMENT,
+          });
+          this._renderTargetView = this._renderTarget.createView();
         }
 
-        if (program.cullFace !== undefined) {
-          if (program.cullFace === NONE) {
-            this.disableCullFace();
-          } else {
-            this.enableCullFace();
-            this.cullFace(program.cullFace);
-          }
+        if (
+          this._depthTexture?.width !== this._canvas.width ||
+          this._depthTexture?.height !== this._canvas.height
+        ) {
+          this._depthTexture?.destroy();
+          this._depthTexture = this._device.createTexture({
+            size: [this._canvas.width, this._canvas.height],
+            sampleCount: 4,
+            format: "depth24plus",
+            usage: GPUTextureUsage.RENDER_ATTACHMENT,
+          });
+          this._depthTextureView = this._depthTexture.createView();
         }
-        
+
+        const renderPassDescriptor = {
+          colorAttachments: [
+            {
+              view: this._renderTargetView,
+              resolveTarget: this._context.getCurrentTexture().createView(),
+              clearValue: { r: 0.0, g: 0.0, b: 0.0, a: 1.0 },
+              loadOp: "clear",
+              storeOp: "store",
+            },
+          ],
+          depthStencilAttachment: {
+            view: this._depthTextureView,
+            depthClearValue: 1.0,
+            depthLoadOp: "clear",
+            depthStoreOp: "store",
+          },
+        };
+
+        this._renderPassDescriptor =
+          renderPassDescriptor as GPURenderPassDescriptor;
+
         // skin meshes require node reference to update skin matrices
         if (node.mesh.isSkinMesh) {
           node.mesh.draw(program, node);
         } else {
           node.mesh.draw(program);
         }
-        
       }
     };
 
@@ -307,14 +348,13 @@ export default class Bolt {
       this._opaqueNodes = [];
       this._transparentNodes = [];
 
-      if (!drawables.draw) return;
+      if (drawables && !drawables.draw) return;
 
       // traverse nodes and sort into transparent and opaque lists
       drawables.traverse((node: Node) => {
         drawables.updateModelMatrix();
 
         if (node instanceof DrawSet) {
-
           if (node.program.transparent) {
             this._transparentNodes.push(node);
           } else {
@@ -371,7 +411,7 @@ export default class Bolt {
   public get activeTextureUnit() {
     return this._activeTextureUnit;
   }
-  
+
   public set activeTextureUnit(value) {
     this._activeTextureUnit = value;
   }
@@ -379,9 +419,24 @@ export default class Bolt {
   public get boundTexture() {
     return this._boundTexture;
   }
-  
+
   public set boundTexture(value) {
     this._boundTexture = value;
   }
 
+  public get device(): GPUDevice | undefined {
+    return this._device;
+  }
+
+  public get context(): GPUCanvasContext {
+    return this._context;
+  }
+
+  public get presentationFormat(): GPUTextureFormat | undefined {
+    return this._presentationFormat;
+  }
+
+  public get renderPassDescriptor(): GPURenderPassDescriptor | undefined {
+    return this._renderPassDescriptor;
+  }
 }

@@ -1,22 +1,23 @@
-import VBOInstanced from "./core/VBOInstanced";
-import VBO from "./core/VBO";
-import VAO from "./core/VAO";
+import VBOInstancedWebgl from "./core/webgl/VBOInstancedWebgl";
+import VBOWebgl from "./core/webgl/VBOWebgl";
+import VAO from "./core/webgl/VAO";
 import Transform from "./core/Transform";
 import TextureCube from "./core/TextureCube";
 import Texture2D from "./core/Texture2D";
 import TextureSampler from "./core/TextureSampler";
 import Texture from "./core/Texture";
-import RBO from "./core/RBO";
+import RBO from "./core/webgl/RBO";
 import Program from "./core/Program";
 import Node from "./core/Node";
 import Mesh from "./core/Mesh";
-import IBO from "./core/IBO";
-import FBO from "./core/FBO";
+import IBOWebgl from "./core/webgl/IBOWebgl";
+import FBO from "./core/webgl/FBO";
 import DrawSet from "./core/DrawSet";
 import CameraPersp from "./core/CameraPersp";
 import CameraOrtho from "./core/CameraOrtho";
 import Camera from "./core/Camera";
-import Bolt from "./core/Bolt";
+import Bolt from "./core/webgl/Bolt";
+import BoltWGPU from "./core/webgpu/BoltWGPU";
 
 import AxisAlignedBox from "./modules/raycast/AxisAlignedBox";
 import AssetCache, { AssetType } from "./modules/asset-cache";
@@ -36,6 +37,7 @@ import parseHdr from "./modules/hdr-parse";
 import Raycast from "./modules/raycast";
 import Ray from "./modules/raycast/Ray";
 import Orbit from "./modules/orbit";
+import DracoLoader from "./modules/draco-loader";
 
 import Post from "./modules/post";
 import FastBlurPass from "./modules/post/passes/FastBlurPass";
@@ -57,7 +59,7 @@ import Sphere from "./modules/primitives/Sphere";
 import SkinMesh from "./modules/gltf-loader/SkinMesh";
 
 export * from "./core/GLUtils";
-export * from "./core/Constants";
+export * from "./core/webgl/Constants";
 export * from "./core/Types";
 
 export {
@@ -77,13 +79,14 @@ export {
   TextureCube,
   Transform,
   VAO,
-  VBO,
-  IBO,
-  VBOInstanced,
+  VBOWebgl as VBO,
+  IBOWebgl as IBO,
+  VBOInstancedWebgl as VBOInstanced,
   AssetCache,
   AssetType,
   Clock,
   DracoDecoder,
+  DracoLoader,
   GLTFLoader,
   GLTFScene,
   Channel,
@@ -107,6 +110,7 @@ export {
   Plane,
   Sphere,
   Bolt,
+  BoltWGPU,
   GL_RESIZE_TOPIC,
   GL_TOUCH_END_TOPIC,
   GL_TOUCH_MOVE_TOPIC,

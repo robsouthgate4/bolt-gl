@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+//@ts-nocheck
+
 import { Bolt, FLOAT, POINTS, VAO, VBO, AttribPointer, Program } from "../../";
 
 export interface VBOSwapDefinition {

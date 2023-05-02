@@ -1,15 +1,14 @@
-import { TypedArray } from "./Types";
+import { TypedArray } from "../Types";
 import { ARRAY_BUFFER, STATIC_DRAW } from "./Constants";
 import Bolt from "./Bolt";
-export default class VBO {
+export default class VBOWebgl {
   private _gl: WebGL2RenderingContext;
   private _buffer: WebGLBuffer;
 
-  constructor(data: TypedArray, drawType = STATIC_DRAW) {
-    this._gl = Bolt.getInstance().getContext();
+  constructor(renderer: Bolt, data: TypedArray, drawType = STATIC_DRAW) {
+    this._gl = renderer.getContext();
     this._buffer = <WebGLBuffer>this._gl.createBuffer();
     this._gl.bindBuffer(ARRAY_BUFFER, this._buffer);
-
     this._gl.bufferData(ARRAY_BUFFER, data, drawType);
   }
 

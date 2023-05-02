@@ -1,22 +1,22 @@
-import VBOInstanced from "./VBOInstanced";
-import VBO from "./VBO";
-import { AttribPointer } from "./Types";
+import VBOInstancedWebgl from "./VBOInstancedWebgl";
+import VBOWebgl from "./VBOWebgl";
+import { AttribPointer } from "../Types";
 import { FLOAT } from "./Constants";
 import Bolt from "./Bolt";
 
 export default class VAO {
   private _arrayObject: WebGLVertexArrayObject;
   private _gl: WebGL2RenderingContext;
-  private _vbos: (VBO | VBOInstanced)[] = [];
+  private _vbos: (VBOWebgl | VBOInstancedWebgl)[] = [];
 
-  constructor() {
-    this._gl = Bolt.getInstance().getContext();
+  constructor(renderer: Bolt) {
+    this._gl = renderer.getContext();
     this._arrayObject = <WebGLVertexArrayObject>this._gl.createVertexArray();
   }
 
   /**
    * Enable vetex attribute array, either with layout id or attribute name
-   * @param  {VBO|VBOInstanced} vbo
+   * @param  {VBOWebgl|VBOInstancedWebgl} vbo
    * @param  {number|AttribPointer} layoutID as either integer or attribute name ( requires program to be passed )
    * @param  {number} numComponents
    * @param  {number} type
@@ -24,7 +24,7 @@ export default class VAO {
    * @param  {number} offset=0
    */
   linkAttrib(
-    vbo: VBO | VBOInstanced,
+    vbo: VBOWebgl | VBOInstancedWebgl,
     layoutID: number | AttribPointer,
     numComponents: number,
     type: number,

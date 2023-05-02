@@ -1,7 +1,7 @@
 import { ELEMENT_ARRAY_BUFFER, STATIC_DRAW } from "./Constants";
 import Bolt from "./Bolt";
 
-export default class IBO {
+export default class IBOWebgl {
   private _gl!: WebGL2RenderingContext;
   private _count!: number;
   private _indicesBuffer!: WebGLBuffer | null;
