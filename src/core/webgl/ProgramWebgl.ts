@@ -45,6 +45,7 @@ export default class ProgramWebgl {
   private _bolt: Renderer;
 
   protected _context: WebGL2RenderingContext;
+  private _renderer: Bolt;
 
   constructor(
     renderer: Bolt,
@@ -61,6 +62,7 @@ export default class ProgramWebgl {
 
     this._bolt = renderer;
     this._context = this._bolt.getContext();
+    this._renderer = renderer;
 
     this._vertexShaderSource = parameters.vertexShaderSrc;
     this._fragmentShaderSource = parameters.fragmentShaderSrc;
@@ -151,7 +153,7 @@ export default class ProgramWebgl {
       ) {
         textureUnit++;
 
-        const tempTexture = new Texture2D({
+        const tempTexture = new Texture2D(this._renderer, {
           width: 1,
           height: 1,
           type: FLOAT,
@@ -206,63 +208,63 @@ export default class ProgramWebgl {
     }
   }
 
-  setBool(uniform: string, value: number) {
+  setBool(uniform: string, value: number, uniformBlock?: string) {
     const location = this.getLocation(uniform);
     if (!location) return;
     this._context.uniform1i(location, +value);
     this._uniforms[uniform] = { location, value };
   }
 
-  setInt(uniform: string, value: number) {
+  setInt(uniform: string, value: number, uniformBlock?: string) {
     const location = this.getLocation(uniform);
     if (!location) return;
     this._context.uniform1i(location, value);
     this._uniforms[uniform] = { location, value };
   }
 
-  setFloat(uniform: string, value: number) {
+  setFloat(uniform: string, value: number, uniformBlock?: string) {
     const location = this.getLocation(uniform);
     if (!location) return;
     this._uniforms[uniform] = { location, value };
     this._context.uniform1f(location, value);
   }
 
-  setVector2(uniform: string, value: vec2) {
+  setVector2(uniform: string, value: vec2, uniformBlock?: string) {
     const location = this.getLocation(uniform);
     if (!location) return;
     this._context.uniform2fv(location, value);
     this._uniforms[uniform] = { location, value };
   }
 
-  setVector3(uniform: string, value: vec3) {
+  setVector3(uniform: string, value: vec3, uniformBlock?: string) {
     const location = this.getLocation(uniform);
     if (!location) return;
     this._context.uniform3fv(location, value);
     this._uniforms[uniform] = { location, value };
   }
 
-  setVector4(uniform: string, value: vec4) {
+  setVector4(uniform: string, value: vec4, uniformBlock?: string) {
     const location = this.getLocation(uniform);
     if (!location) return;
     this._context.uniform4fv(location, value);
     this._uniforms[uniform] = { location, value };
   }
 
-  setMatrix2(uniform: string, value: mat2) {
+  setMatrix2(uniform: string, value: mat2, uniformBlock?: string) {
     const location = this.getLocation(uniform);
     if (!location) return;
     this._context.uniformMatrix2fv(location, false, value);
     this._uniforms[uniform] = { location, value };
   }
 
-  setMatrix3(uniform: string, value: mat3) {
+  setMatrix3(uniform: string, value: mat3, uniformBlock?: string) {
     const location = this.getLocation(uniform);
     if (!location) return;
     this._context.uniformMatrix3fv(location, false, value);
     this._uniforms[uniform] = { location, value };
   }
 
-  setMatrix4(uniform: string, value: mat4) {
+  setMatrix4(uniform: string, value: mat4, uniformBlock?: string) {
     const location = this.getLocation(uniform);
     if (!location) return;
     this._context.uniformMatrix4fv(location, false, value);

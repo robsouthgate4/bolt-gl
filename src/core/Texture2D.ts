@@ -1,6 +1,3 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
-//@ts-nocheck
-
 import Texture from "./Texture";
 import {
   CLAMP_TO_EDGE,
@@ -9,29 +6,32 @@ import {
   TEXTURE_2D,
   UNSIGNED_BYTE,
 } from "./webgl/Constants";
-import { TypedArray } from "./Types";
+import { Renderer, TypedArray } from "./Types";
 
 export default class Texture2D extends Texture {
   private _image: HTMLImageElement | undefined;
   private _data: TypedArray | undefined;
 
-  constructor({
-    imagePath = "",
-    wrapS = CLAMP_TO_EDGE,
-    wrapT = CLAMP_TO_EDGE,
-    width = 1,
-    height = 1,
-    depthAttachment = false,
-    minFilter = LINEAR,
-    magFilter = LINEAR,
-    format = RGBA,
-    internalFormat = RGBA,
-    type = UNSIGNED_BYTE,
-    generateMipmaps = true,
-    flipY = true,
-    target = TEXTURE_2D,
-  } = {}) {
-    super({
+  constructor(
+    renderer: Renderer,
+    {
+      imagePath = "",
+      wrapS = CLAMP_TO_EDGE,
+      wrapT = CLAMP_TO_EDGE,
+      width = 1,
+      height = 1,
+      depthAttachment = false,
+      minFilter = LINEAR,
+      magFilter = LINEAR,
+      format = RGBA,
+      internalFormat = RGBA,
+      type = UNSIGNED_BYTE,
+      generateMipmaps = true,
+      flipY = true,
+      target = TEXTURE_2D,
+    } = {}
+  ) {
+    super(renderer, {
       imagePath,
       wrapS,
       wrapT,

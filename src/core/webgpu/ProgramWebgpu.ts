@@ -56,6 +56,7 @@ export default class ProgramWebgpu {
     const normal = mat4.create();
     const modelViewProjection = mat4.create();
 
+    // TODO: these should be split into Camera and Node - Camera is global and Node is local
     this._uniforms.ViewData = {
       bindGroupID: 0,
       values: {
@@ -209,6 +210,43 @@ export default class ProgramWebgpu {
         format: "depth24plus",
       },
     });
+  }
+
+  setBool(uniform: string, value: boolean, uniformBlock: string) {
+    this.setBlockUniform(uniformBlock, uniform, value);
+  }
+
+  setInt(uniform: string, value: number, uniformBlock: string) {
+    this.setBlockUniform(uniformBlock, uniform, value);
+  }
+
+  setFloat(uniform: string, value: number, uniformBlock: string) {
+    this.setBlockUniform(uniformBlock, uniform, value);
+  }
+
+  setVector2(uniform: string, value: vec2, uniformBlock: string) {
+    this.setBlockUniform(uniformBlock, uniform, value);
+  }
+
+  setVector3(uniform: string, value: vec3, uniformBlock: string) {
+    this.setBlockUniform(uniformBlock, uniform, value);
+  }
+
+  setVector4(uniform: string, value: vec4, uniformBlock: string) {
+    this.setBlockUniform(uniformBlock, uniform, value);
+  }
+
+  setMatrix3(uniform: string, value: mat3, uniformBlock: string) {
+    this.setBlockUniform(uniformBlock, uniform, value);
+  }
+
+  setMatrix4(uniform: string, value: mat4, uniformBlock: string) {
+    this.setBlockUniform(uniformBlock, uniform, value);
+  }
+
+  setTexture(uniform: string, value: Texture, uniformBlock: string) {
+    //TODO: implement
+    return;
   }
 
   setBlockUniform(uniformBlock: string, uniform: string, value: UniformType) {

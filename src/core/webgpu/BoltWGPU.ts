@@ -9,6 +9,7 @@ import Node from "../Node";
 import DrawSet from "../DrawSet";
 import { NONE } from "../webgl/Constants";
 import Camera from "../Camera";
+import GeometryRendererWebgpu from "./GeometryRendererWebgpu";
 
 export default class BoltWGPU {
   private static _instance: BoltWGPU;
@@ -274,6 +275,62 @@ export default class BoltWGPU {
   draw(drawables: Node) {
     this._camera.update();
 
+    if (!this._device) return;
+    const commandEncoder = this._device.createCommandEncoder();
+
+    const renderPassDescriptor = {
+      colorAttachments: [
+        {
+          view: this._renderTarget.createView(),
+          resolveTarget: this._context.getCurrentTexture().createView(),
+          clearValue: { r: 0.0, g: 0.0, b: 0.0, a: 1.0 },
+          loadOp: "clear",
+          storeOp: "store",
+        },
+      ],
+      depthStencilAttachment: {
+        view: this._depthTexture.createView(),
+        depthClearValue: 1.0,
+        depthLoadOp: "clear",
+        depthStoreOp: "store",
+      },
+    };
+
+    this._renderPassDescriptor =
+      renderPassDescriptor as GPURenderPassDescriptor;
+
+    const passEncoder = commandEncoder.beginRenderPass(
+      this._renderPassDescriptor
+    );
+
+    if (
+      this._renderTarget?.width !== this._canvas.width ||
+      this._renderTarget?.height !== this._canvas.height
+    ) {
+      this._renderTarget?.destroy();
+      this._renderTarget = this._device.createTexture({
+        size: [this._canvas.width, this._canvas.height],
+        sampleCount: 4,
+        format: this._presentationFormat,
+        usage: GPUTextureUsage.RENDER_ATTACHMENT,
+      });
+      this._renderTargetView = this._renderTarget.createView();
+    }
+
+    if (
+      this._depthTexture?.width !== this._canvas.width ||
+      this._depthTexture?.height !== this._canvas.height
+    ) {
+      this._depthTexture?.destroy();
+      this._depthTexture = this._device.createTexture({
+        size: [this._canvas.width, this._canvas.height],
+        sampleCount: 4,
+        format: "depth24plus",
+        usage: GPUTextureUsage.RENDER_ATTACHMENT,
+      });
+      this._depthTextureView = this._depthTexture.createView();
+    }
+
     const render = (node: Node) => {
       if (!this._device) return;
 
@@ -286,60 +343,14 @@ export default class BoltWGPU {
 
         program.updateMatrices(node, this._camera);
 
-        if (
-          this._renderTarget?.width !== this._canvas.width ||
-          this._renderTarget?.height !== this._canvas.height
-        ) {
-          this._renderTarget?.destroy();
-          this._renderTarget = this._device.createTexture({
-            size: [this._canvas.width, this._canvas.height],
-            sampleCount: 4,
-            format: this._presentationFormat,
-            usage: GPUTextureUsage.RENDER_ATTACHMENT,
-          });
-          this._renderTargetView = this._renderTarget.createView();
-        }
-
-        if (
-          this._depthTexture?.width !== this._canvas.width ||
-          this._depthTexture?.height !== this._canvas.height
-        ) {
-          this._depthTexture?.destroy();
-          this._depthTexture = this._device.createTexture({
-            size: [this._canvas.width, this._canvas.height],
-            sampleCount: 4,
-            format: "depth24plus",
-            usage: GPUTextureUsage.RENDER_ATTACHMENT,
-          });
-          this._depthTextureView = this._depthTexture.createView();
-        }
-
-        const renderPassDescriptor = {
-          colorAttachments: [
-            {
-              view: this._renderTargetView,
-              resolveTarget: this._context.getCurrentTexture().createView(),
-              clearValue: { r: 0.0, g: 0.0, b: 0.0, a: 1.0 },
-              loadOp: "clear",
-              storeOp: "store",
-            },
-          ],
-          depthStencilAttachment: {
-            view: this._depthTextureView,
-            depthClearValue: 1.0,
-            depthLoadOp: "clear",
-            depthStoreOp: "store",
-          },
-        };
-
-        this._renderPassDescriptor =
-          renderPassDescriptor as GPURenderPassDescriptor;
+        const geoRenderer = node.mesh
+          .geometryRenderer as GeometryRendererWebgpu;
 
         // skin meshes require node reference to update skin matrices
         if (node.mesh.isSkinMesh) {
-          node.mesh.draw(program, node);
+          geoRenderer.draw(program, passEncoder);
         } else {
-          node.mesh.draw(program);
+          geoRenderer.draw(program, passEncoder);
         }
       }
     };
@@ -378,6 +389,9 @@ export default class BoltWGPU {
         render(node);
       });
     }
+
+    passEncoder.end();
+    this._device.queue.submit([commandEncoder.finish()]);
   }
 
   public get dpi(): number {

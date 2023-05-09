@@ -20,6 +20,7 @@ import Skin from "./Skin";
 export default class SkinMesh extends Mesh {
   private _skin: Skin | undefined;
   private _jointTexture: Texture2D | undefined;
+  private _renderer: Renderer;
 
   constructor(
     renderer: Renderer,
@@ -27,6 +28,7 @@ export default class SkinMesh extends Mesh {
     params?: MeshParams
   ) {
     super(renderer, geometry, params);
+    this._renderer = renderer;
     this.isSkinMesh = true;
   }
 
@@ -34,7 +36,7 @@ export default class SkinMesh extends Mesh {
     const w = 4;
     const h = skin.joints.length;
 
-    this._jointTexture = new Texture2D({
+    this._jointTexture = new Texture2D(this._renderer, {
       width: w,
       height: h,
       internalFormat: RGBA32f,

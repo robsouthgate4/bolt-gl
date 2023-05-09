@@ -1,7 +1,5 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
-//@ts-nocheck
-
 import Texture from "./Texture";
+import { Renderer } from "./Types";
 import {
   CLAMP_TO_EDGE,
   LINEAR,
@@ -30,30 +28,33 @@ interface MapParams {
 export default class TextureCube extends Texture {
   private _files: FileParams;
 
-  constructor({
-    imagePath = "",
-    files = {
-      px: "",
-      nx: "",
-      py: "",
-      ny: "",
-      pz: "",
-      nz: "",
-    },
-    wrapS = CLAMP_TO_EDGE,
-    wrapT = CLAMP_TO_EDGE,
-    width = 256,
-    height = 256,
-    depthAttachment = false,
-    format = RGBA,
-    minFilter = LINEAR,
-    magFilter = LINEAR,
-    internalFormat = RGBA,
-    generateMipmaps = true,
-    type = UNSIGNED_BYTE,
-    flipY = false,
-  } = {}) {
-    super({
+  constructor(
+    renderer: Renderer,
+    {
+      imagePath = "",
+      files = {
+        px: "",
+        nx: "",
+        py: "",
+        ny: "",
+        pz: "",
+        nz: "",
+      },
+      wrapS = CLAMP_TO_EDGE,
+      wrapT = CLAMP_TO_EDGE,
+      width = 256,
+      height = 256,
+      depthAttachment = false,
+      format = RGBA,
+      minFilter = LINEAR,
+      magFilter = LINEAR,
+      internalFormat = RGBA,
+      generateMipmaps = true,
+      type = UNSIGNED_BYTE,
+      flipY = false,
+    } = {}
+  ) {
+    super(renderer, {
       wrapS,
       wrapT,
       width,

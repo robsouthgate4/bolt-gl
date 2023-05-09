@@ -3,6 +3,7 @@ import BoltWGPU from "./BoltWGPU";
 
 export default class VBOWebgpu {
   private _buffer: GPUBuffer;
+  private _data: TypedArray;
 
   constructor(renderer: BoltWGPU, data: TypedArray) {
     if (!renderer.device)
@@ -19,7 +20,12 @@ export default class VBOWebgpu {
     ) => typeof data)(range);
 
     dest.set(data);
+    this._data = data;
     this._buffer.unmap();
+  }
+
+  updateData(data: TypedArray) {
+    this._data = data;
   }
 
   delete() {

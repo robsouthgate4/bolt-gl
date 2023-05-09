@@ -57,6 +57,8 @@ import Cube from "./modules/primitives/Cube";
 import Plane from "./modules/primitives/Plane";
 import Sphere from "./modules/primitives/Sphere";
 import SkinMesh from "./modules/gltf-loader/SkinMesh";
+import ComputeBuffer from "./core/webgpu/ComputeBuffer";
+import ComputeProgram from "./core/webgpu/ComputeProgram";
 
 export * from "./core/GLUtils";
 export * from "./core/webgl/Constants";
@@ -111,6 +113,8 @@ export {
   Sphere,
   Bolt,
   BoltWGPU,
+  ComputeBuffer,
+  ComputeProgram,
   GL_RESIZE_TOPIC,
   GL_TOUCH_END_TOPIC,
   GL_TOUCH_MOVE_TOPIC,

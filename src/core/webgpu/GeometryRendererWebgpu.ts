@@ -100,22 +100,16 @@ export default class GeometryRendererWebgpu {
     return this;
   }
 
-  public draw(program: Program, node?: Node) {
-    const { device, context, renderPassDescriptor } = this._renderer;
+  public draw(program: Program, passEncoder: GPURenderPassEncoder) {
+    const { device } = this._renderer;
 
-    if (!device || !this._defaultBuffers.positions || !renderPassDescriptor)
-      return;
+    if (!device || !this._defaultBuffers.positions) return;
 
     const programWGPU = program.programRenderer as ProgramWebgpu;
-
-    const commandEncoder = device.createCommandEncoder();
-
-    const passEncoder = commandEncoder.beginRenderPass(renderPassDescriptor);
 
     const vertexCount = this._defaultBuffers.positions.length / 3;
 
     passEncoder.setPipeline(programWGPU.pipeline);
-
     programWGPU.update(passEncoder);
 
     this._vbos.forEach((vbo, index) => {
@@ -128,10 +122,6 @@ export default class GeometryRendererWebgpu {
     } else {
       passEncoder.draw(vertexCount, 1, 0, 0);
     }
-
-    passEncoder.end();
-
-    device.queue.submit([commandEncoder.finish()]);
   }
 
   /**

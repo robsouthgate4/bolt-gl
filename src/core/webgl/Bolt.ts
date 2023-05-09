@@ -301,11 +301,13 @@ export default class Bolt {
           }
         }
 
+        const geoRenderer = node.mesh.geometryRenderer as GeometryRendererWebgl;
+
         // skin meshes require node reference to update skin matrices
         if (node.mesh.isSkinMesh) {
-          node.mesh.draw(program, node);
+          geoRenderer.draw(program, node);
         } else {
-          node.mesh.draw(program);
+          geoRenderer.draw(program);
         }
       }
     };

@@ -41,49 +41,49 @@ export default class Program {
     this._programRenderer = mediator.programType(renderer, parameters);
   }
 
-  setBool(uniform: string, value: number) {
+  setBool(uniform: string, value: number, uniformBlock?: string) {
     const programRenderer = this._programRenderer as ProgramWebgl;
     programRenderer.setBool(uniform, value);
   }
 
-  setInt(uniform: string, value: number) {
+  setInt(uniform: string, value: number, uniformBlock?: string) {
     const programRenderer = this._programRenderer as ProgramWebgl;
-    programRenderer.setInt(uniform, value);
+    programRenderer.setInt(uniform, value, uniformBlock);
   }
 
-  setFloat(uniform: string, value: number) {
+  setFloat(uniform: string, value: number, uniformBlock?: string) {
     const programRenderer = this._programRenderer as ProgramWebgl;
-    programRenderer.setFloat(uniform, value);
+    programRenderer.setFloat(uniform, value, uniformBlock);
   }
 
-  setVector2(uniform: string, value: vec2) {
+  setVector2(uniform: string, value: vec2, uniformBlock?: string) {
     const programRenderer = this._programRenderer as ProgramWebgl;
-    programRenderer.setVector2(uniform, value);
+    programRenderer.setVector2(uniform, value, uniformBlock);
   }
 
-  setVector3(uniform: string, value: vec3) {
+  setVector3(uniform: string, value: vec3, uniformBlock?: string) {
     const programRenderer = this._programRenderer as ProgramWebgl;
-    programRenderer.setVector3(uniform, value);
+    programRenderer.setVector3(uniform, value, uniformBlock);
   }
 
-  setVector4(uniform: string, value: vec4) {
+  setVector4(uniform: string, value: vec4, uniformBlock?: string) {
     const programRenderer = this._programRenderer as ProgramWebgl;
-    programRenderer.setVector4(uniform, value);
+    programRenderer.setVector4(uniform, value, uniformBlock);
   }
 
-  setMatrix2(uniform: string, value: mat2) {
+  setMatrix2(uniform: string, value: mat2, uniformBlock?: string) {
     const programRenderer = this._programRenderer as ProgramWebgl;
-    programRenderer.setMatrix2(uniform, value);
+    programRenderer.setMatrix2(uniform, value, uniformBlock);
   }
 
-  setMatrix3(uniform: string, value: mat3) {
+  setMatrix3(uniform: string, value: mat3, uniformBlock?: string) {
     const programRenderer = this._programRenderer as ProgramWebgl;
-    programRenderer.setMatrix3(uniform, value);
+    programRenderer.setMatrix3(uniform, value, uniformBlock);
   }
 
-  setMatrix4(uniform: string, value: mat4) {
+  setMatrix4(uniform: string, value: mat4, uniformBlock?: string) {
     const programRenderer = this._programRenderer as ProgramWebgl;
-    programRenderer.setMatrix4(uniform, value);
+    programRenderer.setMatrix4(uniform, value, uniformBlock);
   }
 
   setBlockUniform(uniformBlock: string, uniform: string, value: UniformType) {

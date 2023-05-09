@@ -12,21 +12,28 @@ import GeometryRendererWebgpu from "./webgpu/GeometryRendererWebgpu";
 import { FLOAT } from "./webgl/Constants";
 import Mediator from "./Mediator";
 
+let ID = -1;
+
 export default class Mesh {
   private _isSkinMesh = false;
   private _geometryRenderer: GeometryRendererWebgl | GeometryRendererWebgpu;
+  private _id: number;
+  private _renderer: Renderer;
 
   constructor(
     renderer: Renderer,
     geometry?: GeometryBuffers,
     params?: MeshParams
   ) {
+    ID++;
+    this._id = ID;
     const mediator = Mediator.getInstance();
     this._geometryRenderer = mediator.geometryRenderer(
       renderer,
       geometry,
       params
     );
+    this._renderer = renderer;
   }
 
   setDrawType(type: number) {
@@ -52,14 +59,6 @@ export default class Mesh {
     );
   }
 
-  /**
-   * Render bound mesh
-   * @param  {Program} program
-   */
-  draw(program: Program, node?: Node) {
-    this._geometryRenderer.draw(program, node);
-  }
-
   public get isSkinMesh() {
     return this._isSkinMesh;
   }
@@ -68,9 +67,17 @@ export default class Mesh {
     this._isSkinMesh = value;
   }
 
+  public get id() {
+    return this._id;
+  }
+
   public get geometryRenderer():
     | GeometryRendererWebgl
     | GeometryRendererWebgpu {
     return this._geometryRenderer;
+  }
+
+  public get renderer(): Renderer {
+    return this._renderer;
   }
 }

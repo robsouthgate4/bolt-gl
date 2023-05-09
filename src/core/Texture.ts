@@ -1,7 +1,4 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
-//@ts-nocheck
-
-import { TypedArray } from "./Types";
+import { Renderer, TypedArray } from "./Types";
 import {
   CLAMP_TO_EDGE,
   LINEAR,
@@ -42,23 +39,26 @@ export default abstract class Texture {
   private _id: number;
   private _bolt = Bolt.getInstance();
 
-  constructor({
-    imagePath = "",
-    wrapS = CLAMP_TO_EDGE,
-    wrapT = CLAMP_TO_EDGE,
-    width = 256,
-    height = 256,
-    depthAttachment = false,
-    minFilter = LINEAR,
-    magFilter = LINEAR,
-    format = RGBA,
-    internalFormat = RGBA,
-    type = UNSIGNED_BYTE,
-    generateMipmaps = true,
-    flipY = true,
-    target = TEXTURE_2D,
-    name = "",
-  } = {}) {
+  constructor(
+    renderer: Renderer,
+    {
+      imagePath = "",
+      wrapS = CLAMP_TO_EDGE,
+      wrapT = CLAMP_TO_EDGE,
+      width = 256,
+      height = 256,
+      depthAttachment = false,
+      minFilter = LINEAR,
+      magFilter = LINEAR,
+      format = RGBA,
+      internalFormat = RGBA,
+      type = UNSIGNED_BYTE,
+      generateMipmaps = true,
+      flipY = true,
+      target = TEXTURE_2D,
+      name = "",
+    } = {}
+  ) {
     this._id = ID++;
 
     this._gl = this._bolt.getContext();

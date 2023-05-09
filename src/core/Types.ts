@@ -86,6 +86,14 @@ export interface TextureObject {
   texture: Texture | TextureCube;
 }
 
+export interface TextureSettingsWebGPU {
+  device: GPUDevice;
+  width: number;
+  height: number;
+  format: GPUTextureFormat;
+  usage: GPUTextureUsageFlags;
+}
+
 export interface Uniform {
   location: WebGLUniformLocation | undefined;
   value: UniformType;
