@@ -4,7 +4,7 @@
 [![Actions Status][ci-image]][ci-url]
 [![PR Welcome][npm-downloads-image]][npm-downloads-url]-->
 
-Bolt WebGL library
+Bolt WebGL / WebGPU library ( ALPHA )
 
 ## Introduction
 
