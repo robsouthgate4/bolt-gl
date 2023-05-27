@@ -50,6 +50,7 @@ export default class Mediator {
       fragmentShaderSrc?: string | undefined;
       uniforms: UniformObject | UniformObjectWgpu;
       transformFeedbackVaryings?: string[];
+      topology?: GPUPrimitiveTopology;
     }
   ): ProgramWebgl | ProgramWebgpu {
     switch (renderer.rendererType) {
@@ -64,6 +65,7 @@ export default class Mediator {
         return new ProgramWebgpu(renderer as BoltWGPU, {
           shaderSrc: parameters.shaderSrc!,
           uniforms: parameters.uniforms as UniformObjectWgpu,
+          topology: parameters.topology,
         });
       default:
         throw new Error("No renderer found");

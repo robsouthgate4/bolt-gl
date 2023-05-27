@@ -4,7 +4,11 @@ import BoltWGPU from "./BoltWGPU";
 export default class ComputeBuffer {
   private _buffer!: GPUBuffer;
   private _data!: TypedArray;
-  constructor(renderer: BoltWGPU, data: TypedArray) {
+  constructor(
+    renderer: BoltWGPU,
+    data: TypedArray,
+    usage = GPUBufferUsage.VERTEX | GPUBufferUsage.STORAGE
+  ) {
     const device = renderer.device;
 
     if (!device) {
@@ -25,7 +29,13 @@ export default class ComputeBuffer {
 
     this._data.set(data);
     this._buffer.unmap();
+  }
 
-    console.log(this._data);
+  public get data(): TypedArray {
+    return this._data;
+  }
+
+  public get buffer(): GPUBuffer {
+    return this._buffer;
   }
 }

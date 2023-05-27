@@ -130,3 +130,11 @@ export enum RendererType {
   WEBGL = "webgl",
   WEBGPU = "webgpu",
 }
+
+export type WebgpuAttributeBuffer = {
+  buffer: TypedArray;
+  size: number;
+  type: number;
+  offset: number;
+  divisor: number | undefined;
+};

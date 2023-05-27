@@ -10,7 +10,7 @@ export default class IBOWebgpu {
       throw new Error("No device found, please initialise renderer first");
 
     this._buffer = renderer.device.createBuffer({
-      size: (data.byteLength + 3) & ~3,
+      size: (data.byteLength + 3) & ~3, // round up to multiple of 4
       usage: GPUBufferUsage.INDEX,
       mappedAtCreation: true,
     });

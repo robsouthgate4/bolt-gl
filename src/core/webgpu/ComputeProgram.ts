@@ -1,4 +1,6 @@
+import { TypedArray } from "bolt-wgpu";
 import BoltWGPU from "./BoltWGPU";
+import ComputeBuffer from "./ComputeBuffer";
 
 interface BufferDescriptor {
   buffer: GPUBuffer;
@@ -17,94 +19,42 @@ export default class ComputeProgram {
 
   constructor(
     renderer: BoltWGPU,
-    paramaters: {
+    parameters: {
       shaderSrc: string;
       bufferDescriptors: BufferDescriptor[];
     }
   ) {
+    if (!renderer.device) throw new Error("No device found");
     this.device = renderer.device;
-
-    if (!this.device) {
-      return;
-    }
-
-    this.shaderSrc = paramaters.shaderSrc;
+    this.shaderSrc = parameters.shaderSrc;
     this.module = this.device.createShaderModule({ code: this.shaderSrc });
-
-    this.createPipeline("main");
+    this.createPipeline("CSMain");
+    this.createStagingBuffer();
+    this.createOutputBuffer();
+    this.createBindGroup(parameters.bufferDescriptors);
   }
 
-  public createPipeline(kernelName: string): void {
-    if (!this.device) return;
-
-    const bindGroupLayout = this.device.createBindGroupLayout({
-      entries: [
-        {
-          binding: 1,
-          visibility: GPUShaderStage.COMPUTE,
-          buffer: {
-            type: "storage",
-          },
-        },
-      ],
-    });
-
-    const BUFFER_SIZE = 1000 * 4;
-
-    this.output = this.device.createBuffer({
-      size: BUFFER_SIZE,
-      usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC,
-    });
-
-    this.stagingBuffer = this.device.createBuffer({
-      size: BUFFER_SIZE,
-      usage: GPUBufferUsage.MAP_READ | GPUBufferUsage.COPY_DST,
-    });
-
-    this.bindGroup = this.device.createBindGroup({
-      layout: bindGroupLayout,
-      entries: [
-        {
-          binding: 1,
-          resource: {
-            buffer: this.output,
-          },
-        },
-      ],
-    });
-
-    this.pipeline = this.device.createComputePipeline({
-      layout: this.device.createPipelineLayout({
-        bindGroupLayouts: [bindGroupLayout],
-      }),
-      compute: {
-        module: this.module,
-        entryPoint: kernelName,
-      },
-    });
+  private createPipeline(kernelName: string): void {
+    return;
   }
 
-  public async dispatch(workGroupSize: number) {
-    if (!this.pipeline || !this.device) {
-      throw new Error("Pipeline not created");
-    }
+  private createStagingBuffer(): void {
+    return;
+  }
 
-    const BUFFER_SIZE = 1000 * 4;
+  private createOutputBuffer(): void {
+    return;
+  }
 
-    const encoder = this.device.createCommandEncoder();
-    const passEncoder = encoder.beginComputePass();
-    passEncoder.setPipeline(this.pipeline);
-    passEncoder.setBindGroup(0, this.bindGroup);
+  private createBindGroup(bufferDescriptors: BufferDescriptor[]): void {
+    return;
+  }
 
-    passEncoder.dispatchWorkgroups(Math.ceil(BUFFER_SIZE / workGroupSize));
-    passEncoder.end();
-    this.device.queue.submit([encoder.finish()]);
+  public setBuffers(index: number, buffer: ComputeBuffer): void {
+    return;
+  }
 
-    await this.stagingBuffer.mapAsync(GPUMapMode.READ, 0, BUFFER_SIZE);
-
-    const arrayBuffer = this.stagingBuffer.getMappedRange(0, BUFFER_SIZE);
-    const data = arrayBuffer.slice(0);
-    this.stagingBuffer.unmap();
-    console.log(new Float32Array(data));
+  public async dispatch(workGroupSize: number): Promise<void> {
+    return;
   }
 }

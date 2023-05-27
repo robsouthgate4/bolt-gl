@@ -1,8 +1,6 @@
 import { mat4, vec3 } from "gl-matrix";
 
 import Transform from "./Transform";
-import Program from "./Program";
-import Camera from "./Camera";
 
 /**
  * Node class
@@ -24,11 +22,13 @@ export default class Node {
   private _cameraDepth!: number;
   private _abstractData: any = {};
   private _isJoint = false;
+  private _modelViewProjectionMatrix: mat4;
 
   constructor() {
     this._localMatrix = mat4.create();
     this._modelMatrix = mat4.create();
     this._modelViewMatrix = mat4.create();
+    this._modelViewProjectionMatrix = mat4.create();
     this._normalMatrix = mat4.create();
     this._inverseModelViewMatrix = mat4.create();
     this._children = [];
@@ -162,8 +162,17 @@ export default class Node {
   public get inverseModelViewMatrix(): mat4 {
     return this._inverseModelViewMatrix;
   }
+
   public set inverseModelViewMatrix(value: mat4) {
     this._inverseModelViewMatrix = value;
+  }
+
+  public get modelViewProjectionMatrix(): mat4 {
+    return this._modelViewProjectionMatrix;
+  }
+
+  public set modelViewProjectionMatrix(value: mat4) {
+    this._modelViewProjectionMatrix = value;
   }
 
   public get localMatrix(): mat4 {

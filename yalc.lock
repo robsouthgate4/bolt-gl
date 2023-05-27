@@ -1,0 +1,9 @@
+{
+  "version": "v1",
+  "packages": {
+    "bolt-wgpu": {
+      "signature": "b0e7ed880df27aa6f53f6ad4826a5130",
+      "file": true
+    }
+  }
+}

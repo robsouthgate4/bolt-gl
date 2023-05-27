@@ -18,6 +18,7 @@ import CameraOrtho from "./core/CameraOrtho";
 import Camera from "./core/Camera";
 import Bolt from "./core/webgl/Bolt";
 import BoltWGPU from "./core/webgpu/BoltWGPU";
+import GeometryRendererWebgl from "./core/webgl/GeometryRendererWebgl";
 
 import AxisAlignedBox from "./modules/raycast/AxisAlignedBox";
 import AssetCache, { AssetType } from "./modules/asset-cache";
@@ -59,6 +60,8 @@ import Sphere from "./modules/primitives/Sphere";
 import SkinMesh from "./modules/gltf-loader/SkinMesh";
 import ComputeBuffer from "./core/webgpu/ComputeBuffer";
 import ComputeProgram from "./core/webgpu/ComputeProgram";
+import GeometryRendererWebgpu from "./core/webgpu/GeometryRendererWebgpu";
+import TopologyWGPU from "./core/webgpu/TopologyWGPU";
 
 export * from "./core/GLUtils";
 export * from "./core/webgl/Constants";
@@ -83,7 +86,9 @@ export {
   VAO,
   VBOWebgl as VBO,
   IBOWebgl as IBO,
-  VBOInstancedWebgl as VBOInstanced,
+  VBOInstancedWebgl,
+  GeometryRendererWebgl,
+  GeometryRendererWebgpu,
   AssetCache,
   AssetType,
   Clock,
@@ -115,6 +120,7 @@ export {
   BoltWGPU,
   ComputeBuffer,
   ComputeProgram,
+  TopologyWGPU,
   GL_RESIZE_TOPIC,
   GL_TOUCH_END_TOPIC,
   GL_TOUCH_MOVE_TOPIC,

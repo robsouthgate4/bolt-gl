@@ -11,6 +11,7 @@ import GeometryRendererWebgl from "./webgl/GeometryRendererWebgl";
 import GeometryRendererWebgpu from "./webgpu/GeometryRendererWebgpu";
 import { FLOAT } from "./webgl/Constants";
 import Mediator from "./Mediator";
+import DrawSet from "./DrawSet";
 
 let ID = -1;
 
@@ -79,5 +80,13 @@ export default class Mesh {
 
   public get renderer(): Renderer {
     return this._renderer;
+  }
+
+  draw(program: Program, node?: Node, passEncoder?: GPURenderPassEncoder) {
+    if (this._geometryRenderer instanceof GeometryRendererWebgpu) {
+      this._geometryRenderer.draw(program, node! as DrawSet, passEncoder!);
+    } else {
+      this._geometryRenderer.draw(program, node);
+    }
   }
 }

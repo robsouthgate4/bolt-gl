@@ -7,9 +7,7 @@ import { vec2, vec3 } from "gl-matrix";
 import { BoltParams, RendererType, Viewport } from "../Types";
 import Node from "../Node";
 import DrawSet from "../DrawSet";
-import { NONE } from "../webgl/Constants";
 import Camera from "../Camera";
-import GeometryRendererWebgpu from "./GeometryRendererWebgpu";
 
 export default class BoltWGPU {
   private static _instance: BoltWGPU;
@@ -34,6 +32,12 @@ export default class BoltWGPU {
   private _depthTexture!: GPUTexture;
   private _renderTargetView!: GPUTextureView;
   private _depthTextureView!: GPUTextureView;
+  private _nodeBindGroupLayout!: GPUBindGroupLayout;
+  private _boltPipelineLayout!: GPUPipelineLayout;
+  private _frameBingGroupLayout!: GPUBindGroupLayout;
+  private _frameUniformBuffer!: GPUBuffer;
+  private _frameBindGroup!: GPUBindGroup;
+  private _programBindGroupLayout!: GPUBindGroupLayout;
 
   static getInstance(): BoltWGPU {
     if (!BoltWGPU._instance) BoltWGPU._instance = new BoltWGPU();
@@ -89,12 +93,76 @@ export default class BoltWGPU {
       usage: GPUTextureUsage.RENDER_ATTACHMENT,
     });
 
+    this.initBindGroupsAndPipeline();
+
     this._depthTextureView = this._depthTexture.createView();
 
     this.printBanner();
     this._dpi = dpi;
 
     this.resizeCanvasToDisplay();
+  }
+
+  private initBindGroupsAndPipeline() {
+    if (!this._device) return;
+
+    const matrixSizeBytes = 16 * Float32Array.BYTES_PER_ELEMENT;
+    const bufferSize = 2 * matrixSizeBytes;
+
+    this._frameUniformBuffer = this._device.createBuffer({
+      size: bufferSize,
+      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+    });
+
+    this._frameBingGroupLayout = this._device.createBindGroupLayout({
+      entries: [
+        {
+          binding: 0,
+          visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT,
+          buffer: {},
+        },
+      ],
+    });
+
+    this._nodeBindGroupLayout = this._device.createBindGroupLayout({
+      entries: [
+        {
+          binding: 0,
+          visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT,
+          buffer: {},
+        },
+      ],
+    });
+
+    this._programBindGroupLayout = this._device.createBindGroupLayout({
+      entries: [
+        {
+          binding: 0,
+          visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT,
+          buffer: {},
+        },
+      ],
+    });
+
+    this._frameBindGroup = this._device.createBindGroup({
+      layout: this._frameBingGroupLayout,
+      entries: [
+        {
+          binding: 0,
+          resource: {
+            buffer: this._frameUniformBuffer,
+          },
+        },
+      ],
+    });
+
+    this._boltPipelineLayout = this._device.createPipelineLayout({
+      bindGroupLayouts: [
+        this._programBindGroupLayout,
+        this._nodeBindGroupLayout,
+        this._frameBingGroupLayout,
+      ],
+    });
   }
 
   private printBanner() {
@@ -331,6 +399,22 @@ export default class BoltWGPU {
       this._depthTextureView = this._depthTexture.createView();
     }
 
+    // update frame uniform buffer
+    this._device.queue.writeBuffer(
+      this._frameUniformBuffer,
+      0,
+      this._camera.view as ArrayBuffer
+    );
+
+    this._device.queue.writeBuffer(
+      this._frameUniformBuffer,
+      64,
+      this._camera.projection as ArrayBuffer
+    );
+
+    // set bind group 0 ( view, projection... ) per app frame data
+    passEncoder.setBindGroup(0, this._frameBindGroup);
+
     const render = (node: Node) => {
       if (!this._device) return;
 
@@ -343,14 +427,13 @@ export default class BoltWGPU {
 
         program.updateMatrices(node, this._camera);
 
-        const geoRenderer = node.mesh
-          .geometryRenderer as GeometryRendererWebgpu;
+        const mesh = node.mesh;
 
         // skin meshes require node reference to update skin matrices
         if (node.mesh.isSkinMesh) {
-          geoRenderer.draw(program, passEncoder);
+          mesh.draw(program, node!, passEncoder);
         } else {
-          geoRenderer.draw(program, passEncoder);
+          mesh.draw(program, node!, passEncoder);
         }
       }
     };
@@ -450,7 +533,23 @@ export default class BoltWGPU {
     return this._presentationFormat;
   }
 
+  public get frameUniformBuffer(): GPUBuffer {
+    return this._frameUniformBuffer;
+  }
+
   public get renderPassDescriptor(): GPURenderPassDescriptor | undefined {
     return this._renderPassDescriptor;
+  }
+
+  public get nodeBindGroupLayout(): GPUBindGroupLayout {
+    return this._nodeBindGroupLayout;
+  }
+
+  public get boltPipelineLayout(): GPUPipelineLayout {
+    return this._boltPipelineLayout;
+  }
+
+  public get programBindGroupLayout(): GPUBindGroupLayout {
+    return this._programBindGroupLayout;
   }
 }

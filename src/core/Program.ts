@@ -32,6 +32,7 @@ export default class Program {
       shaderSrc?: string;
       uniforms: UniformObject;
       transformFeedbackVaryings?: string[];
+      topology?: GPUPrimitiveTopology;
     }
   ) {
     ID++;

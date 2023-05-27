@@ -6,13 +6,15 @@ import {
   GeometryBuffers,
   MeshParams,
   TypedArray,
+  WebgpuAttributeBuffer,
 } from "../Types";
-import Node from "../Node";
 import Program from "../Program";
 import BoltWGPU from "./BoltWGPU";
 import IBOWebgpu from "./IBOWebgu";
 import VBOWebgpu from "./VBOWebgu";
 import ProgramWebgpu from "./ProgramWebgpu";
+import DrawSet from "../DrawSet";
+import { FLOAT } from "bolt-wgpu";
 
 export default class GeometryRendererWebgpu {
   private _geometry?: GeometryBuffers;
@@ -26,7 +28,8 @@ export default class GeometryRendererWebgpu {
     uvs2: [],
     indices: [],
   };
-  private _extraBuffers = new Map<string, TypedArray>();
+
+  private _extraBuffers = new Map<string, WebgpuAttributeBuffer>();
   private _drawType: number;
   private _instanced: boolean | undefined;
   private _instanceMatrices: mat4[] | undefined;
@@ -35,6 +38,8 @@ export default class GeometryRendererWebgpu {
   private _faces: Face[] = [];
   private _lineWidth = 1;
   private _vbos: VBOWebgpu[] = [];
+  private _nodeUniformBuffer!: GPUBuffer;
+  private _nodeBindGroup!: GPUBindGroup;
 
   constructor(
     renderer: BoltWGPU,
@@ -44,6 +49,8 @@ export default class GeometryRendererWebgpu {
     this._geometry = geometry;
     this._params = params;
     this._renderer = renderer;
+
+    this._instanceCount = params?.instanceCount || 1;
 
     this._drawType = 1; // default draw mode
 
@@ -69,6 +76,32 @@ export default class GeometryRendererWebgpu {
         new Uint16Array(this._defaultBuffers.indices)
       );
     }
+
+    this.setupNodeBindGroup();
+  }
+
+  private setupNodeBindGroup() {
+    if (!this._renderer.device) return;
+
+    const matrixSizeInBytes = 16 * Float32Array.BYTES_PER_ELEMENT; // 16 floats (4x4 matrix)
+    const bufferSize = 3 * matrixSizeInBytes; // 3 matrices in total, model, normal, modelViewProjection
+
+    this._nodeUniformBuffer = this._renderer.device.createBuffer({
+      size: bufferSize,
+      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+    });
+
+    this._nodeBindGroup = this._renderer.device.createBindGroup({
+      layout: this._renderer.nodeBindGroupLayout,
+      entries: [
+        {
+          binding: 0,
+          resource: {
+            buffer: this._nodeUniformBuffer,
+          },
+        },
+      ],
+    });
   }
 
   private linkDefaultBuffers() {
@@ -76,22 +109,43 @@ export default class GeometryRendererWebgpu {
       this._renderer,
       new Float32Array(this._defaultBuffers.positions!)
     );
+
+    this._vbos.push(positionVbo);
+
+    //if (this.defaultBuffers.normals !== undefined) {
     const normalVbo = new VBOWebgpu(
       this._renderer,
       new Float32Array(this._defaultBuffers.normals!)
     );
+    this._vbos.push(normalVbo);
+    //}
+
+    //if (this.defaultBuffers.uvs !== undefined) {
     const uvVbo = new VBOWebgpu(
       this._renderer,
       new Float32Array(this._defaultBuffers.uvs!)
     );
-
-    this._vbos.push(positionVbo, normalVbo, uvVbo);
+    this._vbos.push(uvVbo);
+    // }
   }
 
-  setAttribute(buffer: TypedArray, layoutID: number | AttribPointer) {
+  setAttribute(
+    buffer: TypedArray,
+    size: number,
+    layoutID: number | AttribPointer,
+    type = FLOAT,
+    offset = 0,
+    divisor: number | undefined = undefined
+  ) {
     const vbo = new VBOWebgpu(this._renderer, buffer);
-    const id = typeof layoutID === "number" ? layoutID : layoutID.attributeName;
-    this._extraBuffers.set(id as string, buffer);
+
+    this._extraBuffers.set(layoutID.toString(), {
+      buffer,
+      size,
+      type,
+      offset,
+      divisor,
+    });
     this._vbos.push(vbo);
   }
 
@@ -100,27 +154,31 @@ export default class GeometryRendererWebgpu {
     return this;
   }
 
-  public draw(program: Program, passEncoder: GPURenderPassEncoder) {
+  public draw(
+    program: Program,
+    node: DrawSet,
+    passEncoder: GPURenderPassEncoder
+  ) {
     const { device } = this._renderer;
 
-    if (!device || !this._defaultBuffers.positions) return;
-
     const programWGPU = program.programRenderer as ProgramWebgpu;
+    if (!device || !this._defaultBuffers.positions || !programWGPU.pipeline)
+      return;
 
     const vertexCount = this._defaultBuffers.positions.length / 3;
 
     passEncoder.setPipeline(programWGPU.pipeline);
-    programWGPU.update(passEncoder);
+    programWGPU.update(passEncoder, node);
 
     this._vbos.forEach((vbo, index) => {
       passEncoder.setVertexBuffer(index, vbo.buffer);
     });
 
-    if (this._ibo) {
+    if (this._defaultBuffers.indices && this._ibo) {
       passEncoder.setIndexBuffer(this._ibo.buffer, "uint16");
-      passEncoder.drawIndexed(this._ibo.count);
+      passEncoder.drawIndexed(this._ibo.count, this._instanceCount);
     } else {
-      passEncoder.draw(vertexCount, 1, 0, 0);
+      passEncoder.draw(vertexCount, this._instanceCount);
     }
   }
 
@@ -181,7 +239,7 @@ export default class GeometryRendererWebgpu {
     this._defaultBuffers = value;
   }
 
-  public get extraBuffers(): Map<string, TypedArray> {
+  public get extraBuffers(): Map<string, WebgpuAttributeBuffer> {
     return this._extraBuffers;
   }
 
@@ -195,5 +253,13 @@ export default class GeometryRendererWebgpu {
 
   public set drawType(value) {
     this._drawType = value;
+  }
+
+  public get nodeUniformBuffer(): GPUBuffer {
+    return this._nodeUniformBuffer;
+  }
+
+  public get nodeBindGroup(): GPUBindGroup {
+    return this._nodeBindGroup;
   }
 }

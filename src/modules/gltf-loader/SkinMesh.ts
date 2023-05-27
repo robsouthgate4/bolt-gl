@@ -14,13 +14,15 @@ import {
   RGB,
   Bolt,
   Renderer,
+  GeometryRendererWebgl,
+  GeometryRendererWebgpu,
+  BoltWGPU,
 } from "../../";
 import Skin from "./Skin";
 
 export default class SkinMesh extends Mesh {
   private _skin: Skin | undefined;
   private _jointTexture: Texture2D | undefined;
-  private _renderer: Renderer;
 
   constructor(
     renderer: Renderer,
@@ -28,7 +30,6 @@ export default class SkinMesh extends Mesh {
     params?: MeshParams
   ) {
     super(renderer, geometry, params);
-    this._renderer = renderer;
     this.isSkinMesh = true;
   }
 
@@ -36,7 +37,9 @@ export default class SkinMesh extends Mesh {
     const w = 4;
     const h = skin.joints.length;
 
-    this._jointTexture = new Texture2D(this._renderer, {
+    //TODO: check if renderer is webgl or webgpu
+
+    this._jointTexture = new Texture2D(this.renderer, {
       width: w,
       height: h,
       internalFormat: RGBA32f,
@@ -55,7 +58,7 @@ export default class SkinMesh extends Mesh {
     this._jointTexture.name = "jointTexture";
   }
 
-  draw(program: Program, node: Node) {
+  draw(program: Program, node: Node, passEncoder?: GPURenderPassEncoder) {
     if (!this._skin || !node) return;
 
     this._skin.update(node!, program, this._jointTexture);
@@ -73,7 +76,14 @@ export default class SkinMesh extends Mesh {
       program.setTexture("jointTexture", this._jointTexture);
     }
 
-    super.draw(program);
+    if (this.renderer instanceof Bolt) {
+      const geoRenderer = super.geometryRenderer as GeometryRendererWebgl;
+      super.draw(program, node!);
+    } else {
+      const renderer = super.renderer as BoltWGPU;
+      const geoRenderer = super.geometryRenderer as GeometryRendererWebgpu;
+      super.draw(program, node, passEncoder);
+    }
   }
 
   public get skin(): Skin | undefined {

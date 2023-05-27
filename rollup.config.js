@@ -37,6 +37,7 @@ export default [ {
 		"src/core/webgl/IBOWebgl.ts",
 		"src/core/webgpu/ComputeProgram.ts",
 		"src/core/webgpu/ComputeBuffer.ts",
+		"src/core/webgpu/TopologyWGPU.ts",
 		"src/core/Mesh.ts",
 		"src/core/Camera.ts",
 		"src/core/CameraPersp.ts",
