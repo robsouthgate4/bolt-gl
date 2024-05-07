@@ -32,6 +32,7 @@ import EventListeners from "./modules/event-listeners";
 import FBOSim, { FBOSwapDefinition } from "./modules/fbo-sim";
 import TransformFeedback from "./modules/transform-feedback";
 import GPUPicker from "./modules/gpu-picker";
+import Floor from "./modules/draw-sets/floor";
 import parseHdr from "./modules/hdr-parse";
 import Raycast from "./modules/raycast";
 import Ray from "./modules/raycast/Ray";
@@ -104,6 +105,7 @@ export {
   Ray,
   Raycast,
   Cube,
+  Floor,
   Plane,
   Sphere,
   Bolt,

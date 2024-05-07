@@ -50,6 +50,7 @@ export default [ {
 		"src/modules/draco-decoder/index.ts",
 		"src/modules/gltf-loader/index.ts",
 		"src/modules/gltf-loader/SkinMesh.ts",
+		"src/modules/draw-sets/floor/index.ts",
 		"src/modules/draw-state/index.ts",
 		"src/modules/event-listeners/index.ts",
 		"src/modules/event-listeners/constants.ts",

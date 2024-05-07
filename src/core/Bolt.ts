@@ -33,7 +33,7 @@ export default class Bolt {
   private _activeProgram = -1;
   private _activeTextureUnit = -1;
   private _boundTexture = -1;
-  
+
   static getInstance(): Bolt {
     if (!Bolt._instance) Bolt._instance = new Bolt();
     return Bolt._instance;
@@ -208,6 +208,8 @@ export default class Bolt {
     // Check if the this.gl.canvas is not the same size.
     const needResize = c.width !== displayWidth || c.height !== displayHeight;
 
+    console.log("resizeCanvasToDisplay", displayWidth, displayHeight);
+
     if (needResize) {
       c.width = displayWidth;
       c.height = displayHeight;
@@ -266,7 +268,7 @@ export default class Bolt {
         if (!node.mesh.vao) return;
 
         const { program } = node;
-        
+
         program.activate();
         program.use();
 
@@ -274,7 +276,7 @@ export default class Bolt {
 
         // set the current blend mode for bound shader
 
-        if(program.transparent === true) {
+        if (program.transparent === true) {
           this.enableAlpha();
           this._gl.blendFunc(
             program.blendFunction.src,
@@ -292,14 +294,13 @@ export default class Bolt {
             this.cullFace(program.cullFace);
           }
         }
-        
+
         // skin meshes require node reference to update skin matrices
         if (node.mesh.isSkinMesh) {
           node.mesh.draw(program, node);
         } else {
           node.mesh.draw(program);
         }
-        
       }
     };
 
@@ -314,7 +315,6 @@ export default class Bolt {
         drawables.updateModelMatrix();
 
         if (node instanceof DrawSet) {
-
           if (node.program.transparent) {
             this._transparentNodes.push(node);
           } else {
@@ -371,7 +371,7 @@ export default class Bolt {
   public get activeTextureUnit() {
     return this._activeTextureUnit;
   }
-  
+
   public set activeTextureUnit(value) {
     this._activeTextureUnit = value;
   }
@@ -379,9 +379,8 @@ export default class Bolt {
   public get boundTexture() {
     return this._boundTexture;
   }
-  
+
   public set boundTexture(value) {
     this._boundTexture = value;
   }
-
 }

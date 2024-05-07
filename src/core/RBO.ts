@@ -16,9 +16,17 @@ export default class RBO {
   constructor({ width = 256, height = 256 } = {}) {
     this._gl = Bolt.getInstance().getContext();
 
+    this._width = width;
+    this._height = height;
+
     this._renderBuffer = <WebGLRenderbuffer>this._gl.createRenderbuffer();
     this.bind();
-    this._gl.renderbufferStorage(RENDERBUFFER, DEPTH_STENCIL, width, height);
+    this._gl.renderbufferStorage(
+      RENDERBUFFER,
+      DEPTH_STENCIL,
+      this._width,
+      this._height
+    );
     this._gl.framebufferRenderbuffer(
       FRAMEBUFFER,
       DEPTH_STENCIL_ATTACHMENT,
@@ -28,8 +36,16 @@ export default class RBO {
   }
 
   resize(width: number, height: number) {
+    this._width = width;
+    this._height = height;
+
     this._gl.bindRenderbuffer(RENDERBUFFER, this._renderBuffer);
-    this._gl.renderbufferStorage(RENDERBUFFER, DEPTH_STENCIL, width, height);
+    this._gl.renderbufferStorage(
+      RENDERBUFFER,
+      DEPTH_STENCIL,
+      this._width,
+      this._height
+    );
     this._gl.bindRenderbuffer(RENDERBUFFER, null);
   }
 

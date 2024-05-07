@@ -37,7 +37,7 @@ export default class Program {
   private _cullFace?: number | undefined = undefined;
   private _id = ID;
   private _bolt: Bolt;
-  
+
   protected _gl: WebGL2RenderingContext;
 
   constructor(
@@ -54,8 +54,8 @@ export default class Program {
     this._bolt = Bolt.getInstance();
     this._gl = Bolt.getInstance().getContext();
 
-    this._vertexShaderSource = vertexShaderSrc;
-    this._fragmentShaderSource = fragmentShaderSrc;
+    this._vertexShaderSource = vertexShaderSrc.trim();
+    this._fragmentShaderSource = fragmentShaderSrc.trim();
 
     this._vertexShader = <WebGLShader>this._gl.createShader(VERTEX_SHADER);
     this._fragmentShader = <WebGLShader>this._gl.createShader(FRAGMENT_SHADER);
@@ -133,7 +133,7 @@ export default class Program {
 
         textureUnit++;
 
-        const tempTexture = new Texture2D({width: 1, height: 1, type: FLOAT, format: RGBA, internalFormat: RGBA32f, generateMipmaps: false});
+        const tempTexture = new Texture2D({ width: 1, height: 1, type: FLOAT, format: RGBA, internalFormat: RGBA32f, generateMipmaps: false });
         tempTexture.setFromData(new Float32Array([1, 1, 0, 1]), 1, 1);
 
         textureUniforms.push({
@@ -146,7 +146,7 @@ export default class Program {
 
         this.activate();
         this._gl.uniform1i(location, textureUnit);
-        
+
       } else {
         this._uniforms[uniformName] = { location, value: undefined };
       }
@@ -273,19 +273,19 @@ export default class Program {
   }
 
   activate() {
-    if(this._bolt.activeProgram === this._id) return;
+    if (this._bolt.activeProgram === this._id) return;
     this._gl.useProgram(this._program);
     this._bolt.activeProgram = this._id;
   }
 
   use() {
     Object.values(this._uniforms).forEach((uniform) => {
-      if(uniform.value instanceof Texture) {
-          const texture = uniform.value;
-          if(this._bolt.activeTextureUnit !== texture.id) {
-            texture.bind(uniform.textureUnit);
-            this._bolt.activeTextureUnit = texture.id;
-          }
+      if (uniform.value instanceof Texture) {
+        const texture = uniform.value;
+        if (this._bolt.activeTextureUnit !== texture.id) {
+          texture.bind(uniform.textureUnit);
+          this._bolt.activeTextureUnit = texture.id;
+        }
       }
     });
   }

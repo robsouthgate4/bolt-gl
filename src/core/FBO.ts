@@ -116,14 +116,12 @@ export default class FBO {
        */
       if (depth) {
         this.attachDepthTexture();
-      }
-      else {
+      } else {
         // if not depth texture, attach a render buffer
         this.attachRBO();
       }
 
       this.unbind();
-
     }
     this._gl.bindTexture(TEXTURE_2D, null);
 
@@ -234,10 +232,10 @@ export default class FBO {
     this._rbo.unbind();
   }
 
-  clear (r = 0, g = 0, b = 0, a = 0) {
-    this.bind()
-    this._bolt.clear(r, g, b, a)
-    this.unbind()
+  clear(r = 0, g = 0, b = 0, a = 0) {
+    this.bind();
+    this._bolt.clear(r, g, b, a);
+    this.unbind();
   }
 
   /**
@@ -280,7 +278,7 @@ export default class FBO {
       this._depthTexture.resize(width, height);
     }
 
-    if(this._rbo) {
+    if (this._rbo) {
       this._rbo.resize(width, height);
     }
 
