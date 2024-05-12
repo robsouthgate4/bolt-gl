@@ -208,8 +208,6 @@ export default class Bolt {
     // Check if the this.gl.canvas is not the same size.
     const needResize = c.width !== displayWidth || c.height !== displayHeight;
 
-    console.log("resizeCanvasToDisplay", displayWidth, displayHeight);
-
     if (needResize) {
       c.width = displayWidth;
       c.height = displayHeight;
@@ -269,7 +267,6 @@ export default class Bolt {
 
         const { program } = node;
 
-        program.activate();
         program.use();
 
         node.updateMatrices(program, this._camera);

@@ -89,7 +89,6 @@ export default class Program {
   }
 
   private linkUniforms() {
-
     const ext = this._gl.getExtension("KHR_parallel_shader_compile");
 
     // use KHR extension to compile shaders in parallel
@@ -129,11 +128,21 @@ export default class Program {
       const location = this._gl.getUniformLocation(this._program, uniform.name);
       if (!location) continue;
 
-      if (uniform.type === this._gl.SAMPLER_2D || uniform.type === this._gl.SAMPLER_CUBE || uniform.type === this._gl.SAMPLER_3D) {
-
+      if (
+        uniform.type === this._gl.SAMPLER_2D ||
+        uniform.type === this._gl.SAMPLER_CUBE ||
+        uniform.type === this._gl.SAMPLER_3D
+      ) {
         textureUnit++;
 
-        const tempTexture = new Texture2D({ width: 1, height: 1, type: FLOAT, format: RGBA, internalFormat: RGBA32f, generateMipmaps: false });
+        const tempTexture = new Texture2D({
+          width: 1,
+          height: 1,
+          type: FLOAT,
+          format: RGBA,
+          internalFormat: RGBA32f,
+          generateMipmaps: false,
+        });
         tempTexture.setFromData(new Float32Array([1, 1, 0, 1]), 1, 1);
 
         textureUniforms.push({
@@ -141,30 +150,26 @@ export default class Program {
           value: tempTexture,
           type: uniform.type,
           location,
-          textureUnit
+          textureUnit,
         });
 
         this.activate();
         this._gl.uniform1i(location, textureUnit);
-
       } else {
         this._uniforms[uniformName] = { location, value: undefined };
       }
     }
 
-    textureUniforms.forEach((uniform,) => {
+    textureUniforms.forEach((uniform) => {
       this._uniforms[uniform.name] = {
         location: uniform.location,
         value: uniform.value,
         textureUnit: uniform.textureUnit,
       };
     });
-
   }
 
-
   private linkShaders(vertexShaderSrc: string, fragmentShaderSrc: string) {
-
     this._gl.shaderSource(this._vertexShader, vertexShaderSrc);
     this._gl.compileShader(this._vertexShader);
 
@@ -182,7 +187,6 @@ export default class Program {
     if (fragmentLogs && fragmentLogs.length > 0) {
       throw fragmentLogs;
     }
-
   }
 
   setBool(uniform: string, value: number) {
@@ -248,10 +252,7 @@ export default class Program {
     this._uniforms[uniform] = { location, value };
   }
 
-  setTexture(
-    uniform: string,
-    texture: Texture | TextureCube,
-  ) {
+  setTexture(uniform: string, texture: Texture | TextureCube) {
     const location = this.getLocation(uniform);
     if (!location) return;
 

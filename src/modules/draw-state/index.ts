@@ -21,9 +21,11 @@ export default class DrawState {
   protected _drawSet: DrawSet | undefined;
   protected _instanceCount!: number;
   protected _mesh?: Mesh;
-  
+
   protected _viewport: Viewport | undefined;
-  private _clearColor: { r: number; g: number; b: number; a: number } | undefined;
+  private _clearColor:
+    | { r: number; g: number; b: number; a: number }
+    | undefined;
   private _cullFace = NONE;
   private _node: Node | undefined;
 
@@ -190,7 +192,6 @@ export default class DrawState {
   }
 
   draw() {
-
     this._viewport &&
       this._bolt.setViewPort(
         this._viewport.offsetX,
@@ -216,7 +217,7 @@ export default class DrawState {
 
     if (this._drawSet !== undefined) {
       this._bolt.draw(this._drawSet);
-    } else if( this._node !== undefined) {
+    } else if (this._node !== undefined) {
       this._bolt.draw(this._node);
     }
 
