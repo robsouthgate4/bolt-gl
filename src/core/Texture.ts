@@ -31,6 +31,7 @@ export default abstract class Texture {
   protected _generateMipmaps: boolean;
   protected _minFilter: number;
   protected _magFilter: number;
+  protected _anistropy = 0;
   protected _imagePath: string;
   protected _pixelType: number;
   protected _name: string;
@@ -55,6 +56,7 @@ export default abstract class Texture {
     flipY = true,
     target = TEXTURE_2D,
     name = "",
+    anistropy = 0,
   } = {}) {
     this._id = ID++;
 
@@ -70,6 +72,7 @@ export default abstract class Texture {
     this._target = target;
     this._minFilter = minFilter;
     this._magFilter = magFilter;
+    this._anistropy = anistropy;
 
     this._name = name;
 
@@ -95,8 +98,7 @@ export default abstract class Texture {
   load?(): void;
 
   bind(index?: number | undefined) {
-
-    if(this._bolt.boundTexture === this._id) return;
+    if (this._bolt.boundTexture === this._id) return;
     this._gl.activeTexture(TEXTURE0 + (index || 0));
     this._gl.bindTexture(this._target, this._texture);
     this._bolt.boundTexture = this._id;
@@ -115,6 +117,9 @@ export default abstract class Texture {
   }
 
   protected applySettings() {
+    if (this._generateMipmaps) {
+      this._gl.generateMipmap(this._target);
+    }
 
     this._gl.pixelStorei(this._gl.UNPACK_FLIP_Y_WEBGL, this._flipY);
     this._gl.texParameteri(this._target, TEXTURE_WRAP_S, this._wrapS);
@@ -122,8 +127,24 @@ export default abstract class Texture {
     this._gl.texParameteri(this._target, TEXTURE_MIN_FILTER, this._minFilter);
     this._gl.texParameteri(this._target, TEXTURE_MAG_FILTER, this._magFilter);
 
-    if (this._generateMipmaps) {
-      this._gl.generateMipmap(this._target);
+    if (this._anistropy > 0) {
+      this.setAnistropy();
+    }
+  }
+
+  private setAnistropy() {
+    const ext =
+      this._gl.getExtension("EXT_texture_filter_anisotropic") ||
+      this._gl.getExtension("MOZ_EXT_texture_filter_anisotropic") ||
+      this._gl.getExtension("WEBKIT_EXT_texture_filter_anisotropic");
+    if (ext) {
+      const max = this._gl.getParameter(ext.MAX_TEXTURE_MAX_ANISOTROPY_EXT);
+      const amount = Math.min(max, this._anistropy);
+      this._gl.texParameterf(
+        this._gl.TEXTURE_2D,
+        ext.TEXTURE_MAX_ANISOTROPY_EXT,
+        amount
+      );
     }
   }
 
@@ -173,8 +194,13 @@ export default abstract class Texture {
     this.bind();
     this._gl.texParameteri(this._target, TEXTURE_WRAP_S, value);
     this.unbind();
-
     this._wrapS = value;
+  }
+
+  public set anistropy(value: number) {
+    this.bind();
+    this.setAnistropy();
+    this.unbind();
   }
 
   public get height(): number {
@@ -251,5 +277,4 @@ export default abstract class Texture {
   public set currentUnit(value: number) {
     this._currentUnit = value;
   }
-
 }

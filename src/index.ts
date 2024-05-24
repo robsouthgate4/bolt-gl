@@ -22,6 +22,7 @@ import AxisAlignedBox from "./modules/raycast/AxisAlignedBox";
 import AssetCache, { AssetType } from "./modules/asset-cache";
 import Clock from "./modules/clock";
 import { DracoDecoder } from "./modules/draco-decoder";
+import DracoLoader from "./modules/draco-loader";
 import GLTFLoader, {
   GLTFScene,
   Channel,
@@ -85,6 +86,7 @@ export {
   AssetType,
   Clock,
   DracoDecoder,
+  DracoLoader,
   GLTFLoader,
   GLTFScene,
   Channel,

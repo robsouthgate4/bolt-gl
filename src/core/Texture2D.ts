@@ -27,6 +27,7 @@ export default class Texture2D extends Texture {
     generateMipmaps = true,
     flipY = true,
     target = TEXTURE_2D,
+    anistropy = 0,
   } = {}) {
     super({
       imagePath,
@@ -43,6 +44,7 @@ export default class Texture2D extends Texture {
       generateMipmaps,
       flipY,
       target,
+      anistropy,
     });
 
     this.init();
@@ -68,17 +70,16 @@ export default class Texture2D extends Texture {
   }
 
   resize(width: number, height: number) {
-    
     this._width = width;
     this._height = height;
-    
+
     this.bind();
 
-    if( this._data ) {
+    if (this._data) {
       this._gl.texSubImage2D(
         TEXTURE_2D,
         0,
-        0, 
+        0,
         0,
         this.width,
         this.height,
@@ -88,8 +89,7 @@ export default class Texture2D extends Texture {
       );
     }
 
-    if( this._image ) {
-
+    if (this._image) {
       this._gl.texImage2D(
         TEXTURE_2D,
         0,
@@ -100,7 +100,7 @@ export default class Texture2D extends Texture {
       );
     }
 
-    if(!this._data && !this._image) {
+    if (!this._data && !this._image) {
       this._gl.texImage2D(
         TEXTURE_2D,
         0,
@@ -113,25 +113,19 @@ export default class Texture2D extends Texture {
         null
       );
     }
-    
   }
 
-  setFromData(
-    data: TypedArray,
-    width: number,
-    height: number
-  ) {
-
+  setFromData(data: TypedArray, width: number, height: number) {
     this._width = width;
     this._height = height;
     this._data = data;
-    
+
     this.bind();
 
     this._gl.texSubImage2D(
       TEXTURE_2D,
       0,
-      0, 
+      0,
       0,
       this.width,
       this.height,
@@ -141,7 +135,6 @@ export default class Texture2D extends Texture {
     );
 
     this.applySettings();
-    
   }
 
   load() {
@@ -155,6 +148,7 @@ export default class Texture2D extends Texture {
         this._height = image.height;
 
         this.bind();
+
         this._gl.texImage2D(
           TEXTURE_2D,
           0,
@@ -169,6 +163,8 @@ export default class Texture2D extends Texture {
         resolve(image);
 
         this._image = image;
+
+        this.unbind();
 
         image.addEventListener("error", (ev) => {
           reject(ev);

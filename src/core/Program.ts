@@ -114,7 +114,7 @@ export default class Program {
     );
 
     const textureUniforms = [];
-    let textureUnit = -1;
+    let textureUnit = 0;
 
     // get the active uniform locations and populate the uniform object
     for (let i = 0; i < uniformCount; i++) {
@@ -138,12 +138,9 @@ export default class Program {
         const tempTexture = new Texture2D({
           width: 1,
           height: 1,
-          type: FLOAT,
-          format: RGBA,
-          internalFormat: RGBA32f,
-          generateMipmaps: false,
         });
-        tempTexture.setFromData(new Float32Array([1, 1, 0, 1]), 1, 1);
+
+        tempTexture.setFromData(new Uint8Array([1, 1, 0, 1]), 1, 1);
 
         textureUniforms.push({
           name: uniformName,

@@ -48,6 +48,7 @@ export default [ {
 		"src/modules/asset-cache/index.ts",
 		"src/modules/clock/index.ts",
 		"src/modules/draco-decoder/index.ts",
+		"src/modules/draco-loader/index.ts",
 		"src/modules/gltf-loader/index.ts",
 		"src/modules/gltf-loader/SkinMesh.ts",
 		"src/modules/draw-sets/floor/index.ts",
