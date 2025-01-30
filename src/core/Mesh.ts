@@ -1,6 +1,4 @@
-import { mat4, vec3 } from "gl-matrix";
-
-import VBOInstanced from "./VBOInstanced";
+import { vec3 } from "gl-matrix";
 import VBO from "./VBO";
 import VAO from "./VAO";
 import {
@@ -14,7 +12,7 @@ import {
 import Program from "./Program";
 import Node from "./Node";
 import IBO from "./IBO";
-import { FLOAT, TRIANGLES, UNSIGNED_INT, UNSIGNED_SHORT } from "./Constants";
+import { FLOAT, TRIANGLES, UNSIGNED_SHORT, STATIC_DRAW } from "./Constants";
 import Bolt from "./Bolt";
 
 export default class Mesh {
@@ -32,18 +30,15 @@ export default class Mesh {
 
   // structured data
   private _faces: Face[] = [];
-  private _vertices: number[][] = [];
-
   private _instanced?: boolean;
   private _vao: VAO;
   private _ibo!: IBO;
-  private _instanceMatrices?: mat4[];
-  private _instanceCount?: number;
   private _drawType: number;
   private _bounds: BoxBounds = { min: vec3.create(), max: vec3.create() };
   private _isSkinMesh = false;
   private _lineWidth?: number;
-
+  private _depthWrite = true;
+  private _depthTest = true;
   constructor(geometry?: GeometryBuffers, params?: MeshParams) {
     this._gl = Bolt.getInstance().getContext();
 
@@ -56,22 +51,15 @@ export default class Mesh {
       this._defaultBuffers.indices = geometry.indices;
     }
 
-    this._instanced = params?.instanced;
-    this._instanceMatrices = params?.instanceMatrices;
-    this._instanceCount = params?.instanceCount;
     this._vao = new VAO();
 
     this.linkDefaultBuffers();
 
-    if (
-      this._defaultBuffers.indices &&
-      this._defaultBuffers.indices.length > 0
-    ) {
-      if (this._instanced) {
-        // use higher precision for instanced meshes
-
-        this._ibo = new IBO(new Uint32Array(this._defaultBuffers.indices));
-      } else {
+    if (!this._instanced) {
+      if (
+        this._defaultBuffers.indices &&
+        this._defaultBuffers.indices.length > 0
+      ) {
         this._ibo = new IBO(new Uint16Array(this._defaultBuffers.indices));
       }
     }
@@ -95,25 +83,34 @@ export default class Mesh {
     layoutID: number | AttribPointer,
     type = FLOAT,
     offset = 0,
-    divisor: number | undefined = undefined
+    divisor: number | undefined = undefined,
+    drawType = STATIC_DRAW
   ) {
-    const vbo = new VBO(buffer);
+    // create new VBO if it doesn't exist
+    if (!this._extraBuffers.has(layoutID as unknown as string)) {
+      const id =
+        typeof layoutID === "number" ? layoutID : layoutID.attributeName;
+      const vbo = new VBO(buffer, drawType, id as string);
 
-    this._vao.bind();
-    this._vao.linkAttrib(
-      vbo,
-      layoutID,
-      size,
-      type,
-      size * buffer.BYTES_PER_ELEMENT,
-      offset * buffer.BYTES_PER_ELEMENT,
-      divisor
-    );
+      this._vao.bind();
+      this._vao.linkAttrib(
+        vbo,
+        layoutID,
+        size,
+        type,
+        size * buffer.BYTES_PER_ELEMENT,
+        offset * buffer.BYTES_PER_ELEMENT,
+        divisor
+      );
 
-    const id = typeof layoutID === "number" ? layoutID : layoutID.attributeName;
-    this._extraBuffers.set(id as string, buffer);
+      this._extraBuffers.set(id as string, buffer);
 
-    this._vao.unbind();
+      this._vao.unbind();
+    } else {
+      // update existing VBO
+      const vbo = this._vao.getVBO(layoutID as unknown as string);
+      if (vbo) vbo.update(buffer);
+    }
   }
 
   setVBO(
@@ -145,10 +142,12 @@ export default class Mesh {
 
   private linkDefaultBuffers() {
     const positionVbo = new VBO(
-      new Float32Array(this._defaultBuffers.positions!)
+      new Float32Array(this._defaultBuffers.positions || [])
     );
-    const normalVbo = new VBO(new Float32Array(this._defaultBuffers.normals!));
-    const uvVbo = new VBO(new Float32Array(this._defaultBuffers.uvs!));
+    const normalVbo = new VBO(
+      new Float32Array(this._defaultBuffers.normals || [])
+    );
+    const uvVbo = new VBO(new Float32Array(this._defaultBuffers.uvs || []));
 
     this._vao.bind();
 
@@ -163,54 +162,6 @@ export default class Mesh {
 
     if (this._defaultBuffers.uvs && this._defaultBuffers.uvs.length > 0) {
       this._vao.linkAttrib(uvVbo, 2, 2, FLOAT, 2 * 4, 0 * 4);
-    }
-
-    if (this._instanced && this._instanceMatrices) {
-      const instancedVBO = new VBOInstanced(this._instanceMatrices);
-      instancedVBO.bind();
-
-      const bytesMatrix = 4 * 16;
-      const bytesVec4 = 4 * Float32Array.BYTES_PER_ELEMENT;
-
-      this._vao.linkAttrib(
-        instancedVBO,
-        3,
-        4,
-        FLOAT,
-        bytesMatrix,
-        0 * bytesVec4
-      );
-      this._vao.linkAttrib(
-        instancedVBO,
-        4,
-        4,
-        FLOAT,
-        bytesMatrix,
-        1 * bytesVec4
-      );
-      this._vao.linkAttrib(
-        instancedVBO,
-        5,
-        4,
-        FLOAT,
-        bytesMatrix,
-        2 * bytesVec4
-      );
-      this._vao.linkAttrib(
-        instancedVBO,
-        6,
-        4,
-        FLOAT,
-        bytesMatrix,
-        3 * bytesVec4
-      );
-
-      this._gl.vertexAttribDivisor(3, 1);
-      this._gl.vertexAttribDivisor(4, 1);
-      this._gl.vertexAttribDivisor(5, 1);
-      this._gl.vertexAttribDivisor(6, 1);
-
-      instancedVBO.unbind();
     }
 
     this._vao.unbind();
@@ -287,43 +238,22 @@ export default class Mesh {
     ) {
       this._ibo.bind();
 
-      if (this._instanced && this._instanceCount) {
-        this._gl.drawElementsInstanced(
-          this._drawType,
-          this._ibo.count,
-          UNSIGNED_INT,
-          0,
-          this._instanceCount
-        );
-      } else {
-        this._gl.drawElements(
-          this._drawType,
-          this._defaultBuffers.indices.length,
-          UNSIGNED_SHORT,
-          0
-        );
-      }
+      this._gl.drawElements(
+        this._drawType,
+        this._defaultBuffers.indices.length,
+        UNSIGNED_SHORT,
+        0
+      );
 
       this._ibo.unbind();
     } else {
-      if (this._instanced && this._instanceCount) {
-        if (!this._defaultBuffers.positions) return;
+      if (!this._defaultBuffers.positions) return;
 
-        this._gl.drawArraysInstanced(
-          this._drawType,
-          0,
-          this._defaultBuffers.positions.length / 3,
-          this._instanceCount
-        );
-      } else {
-        if (!this._defaultBuffers.positions) return;
-
-        this._gl.drawArrays(
-          this._drawType,
-          0,
-          this._defaultBuffers.positions.length / 3
-        );
-      }
+      this._gl.drawArrays(
+        this._drawType,
+        0,
+        this._defaultBuffers.positions.length / 3
+      );
     }
 
     this._vao.unbind();
@@ -406,5 +336,33 @@ export default class Mesh {
 
   public set vao(value: VAO) {
     this._vao = value;
+  }
+
+  public set depthWrite(value: boolean) {
+    this._depthWrite = value;
+  }
+
+  public get depthWrite() {
+    return this._depthWrite;
+  }
+
+  public get depthTest() {
+    return this._depthTest;
+  }
+
+  public set depthTest(value: boolean) {
+    this._depthTest = value;
+  }
+
+  protected get lineWidth() {
+    return this._lineWidth;
+  }
+
+  public get instanced(): boolean {
+    return this._instanced ?? false;
+  }
+
+  public set instanced(value: boolean) {
+    this._instanced = value;
   }
 }

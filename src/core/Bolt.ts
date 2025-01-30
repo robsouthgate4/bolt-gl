@@ -5,7 +5,6 @@ Bolt renderer
 import { vec2, vec3 } from "gl-matrix";
 
 import { BoltParams, Viewport } from "./Types";
-import Program from "./Program";
 import Node from "./Node";
 import DrawSet from "./DrawSet";
 import {
@@ -33,6 +32,8 @@ export default class Bolt {
   private _activeProgram = -1;
   private _activeTextureUnit = -1;
   private _boundTexture = -1;
+  private _currentBlendFunction = { src: -1, dst: -1 };
+  private _currentCullFace = BACK;
 
   static getInstance(): Bolt {
     if (!Bolt._instance) Bolt._instance = new Bolt();
@@ -89,7 +90,7 @@ export default class Bolt {
     ].join(";");
 
     console.log(
-      `%c WebGL rendered with Bolt by RS CREATIVE STUDIO \u26a1 \u26a1`,
+      `%c WebGL rendered with Bolt by RS CREATIVE STUDIO :D \u26a1 \u26a1`,
       style
     );
   }
@@ -149,6 +150,14 @@ export default class Bolt {
 
   disableDepth() {
     this._gl.disable(DEPTH_TEST);
+  }
+
+  enableDepthWrite() {
+    this._gl.depthMask(true);
+  }
+
+  disableDepthWrite() {
+    this._gl.depthMask(false);
   }
 
   enableCullFace() {
@@ -275,10 +284,19 @@ export default class Bolt {
 
         if (program.transparent === true) {
           this.enableAlpha();
-          this._gl.blendFunc(
-            program.blendFunction.src,
-            program.blendFunction.dst
-          );
+
+          if (
+            this._currentBlendFunction.src !== program.blendFunction.src ||
+            this._currentBlendFunction.dst !== program.blendFunction.dst
+          ) {
+            this._gl.blendFunc(
+              program.blendFunction.src,
+              program.blendFunction.dst
+            );
+
+            this._currentBlendFunction.src = program.blendFunction.src;
+            this._currentBlendFunction.dst = program.blendFunction.dst;
+          }
         } else {
           this.disableAlpha();
         }
@@ -290,6 +308,19 @@ export default class Bolt {
             this.enableCullFace();
             this.cullFace(program.cullFace);
           }
+          this._currentCullFace = program.cullFace;
+        }
+
+        if (node.mesh.depthWrite) {
+          this.enableDepthWrite();
+        } else {
+          this.disableDepthWrite();
+        }
+
+        if (node.mesh.depthTest) {
+          this.enableDepth();
+        } else {
+          this.disableDepth();
         }
 
         // skin meshes require node reference to update skin matrices
@@ -297,6 +328,10 @@ export default class Bolt {
           node.mesh.draw(program, node);
         } else {
           node.mesh.draw(program);
+        }
+
+        if (program.cullFace !== undefined) {
+          this.disableCullFace();
         }
       }
     };
@@ -379,5 +414,9 @@ export default class Bolt {
 
   public set boundTexture(value) {
     this._boundTexture = value;
+  }
+
+  public get gl() {
+    return this._gl;
   }
 }

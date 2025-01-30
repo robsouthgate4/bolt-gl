@@ -5,7 +5,13 @@ import { DracoDecoder } from "../draco-decoder";
 export default class DracoLoader {
   private _dracoDecoder: DracoDecoder;
   private _draco: any;
-  private ATTRIB_ID: { position: any; normal: any; color: any; uv: any };
+  private ATTRIB_ID: {
+    position: any;
+    normal: any;
+    color: any;
+    uv: any;
+    st: any;
+  };
   // eslint-disable-next-line @typescript-eslint/ban-types
   private DATA_TYPE: {};
 
@@ -29,6 +35,8 @@ export default class DracoLoader {
       [Uint16Array]: this._draco.DT_UINT16,
       [Uint32Array]: this._draco.DT_UINT32,
     };
+
+    console.log(this._draco);
 
     this.ATTRIB_ID = {
       positions: this._draco.POSITION,
@@ -72,6 +80,10 @@ export default class DracoLoader {
 
   decodeAttribute(draco, decoder, geometry, key, type) {
     const attId = decoder.GetAttributeId(geometry, this.ATTRIB_ID[key]);
+
+    const uvId = decoder.GetAttributeId(geometry, this.ATTRIB_ID["uvs"]);
+    console.log("UV Attribute ID:", uvId);
+
     if (attId == -1) return null;
 
     const attribute = decoder.GetAttribute(geometry, attId);

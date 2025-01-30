@@ -2,12 +2,15 @@ import { mat4 } from "gl-matrix";
 
 import { ARRAY_BUFFER, STATIC_DRAW } from "./Constants";
 import Bolt from "./Bolt";
+import { TypedArray } from "./Types";
 
 export default class VBOInstanced {
   private _gl: WebGL2RenderingContext;
   private _buffer: WebGLBuffer;
+  private _drawType: number;
+  private _id: string;
 
-  constructor(data: mat4[], drawType = STATIC_DRAW) {
+  constructor(data: mat4[], drawType = STATIC_DRAW, id = "") {
     this._gl = Bolt.getInstance().getContext();
     this._buffer = <WebGLBuffer>this._gl.createBuffer();
     this._gl.bindBuffer(ARRAY_BUFFER, this._buffer);
@@ -15,6 +18,9 @@ export default class VBOInstanced {
     const mergedData = this.bufferjoin(data);
 
     this._gl.bufferData(ARRAY_BUFFER, mergedData, drawType);
+
+    this._drawType = drawType;
+    this._id = id;
   }
 
   private sum(a: number[]) {
@@ -39,6 +45,10 @@ export default class VBOInstanced {
     this._gl.bindBuffer(ARRAY_BUFFER, this._buffer);
   }
 
+  update(data: TypedArray, offset = 0) {
+    this._gl.bufferSubData(ARRAY_BUFFER, offset, data);
+  }
+
   unbind() {
     this._gl.bindBuffer(ARRAY_BUFFER, null);
   }
@@ -53,5 +63,13 @@ export default class VBOInstanced {
 
   public set buffer(value: WebGLBuffer) {
     this._buffer = value;
+  }
+
+  public get drawType(): number {
+    return this._drawType;
+  }
+
+  public get id(): string {
+    return this._id;
   }
 }

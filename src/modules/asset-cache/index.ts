@@ -4,7 +4,14 @@ import pMap from "p-map";
 
 import parseHdr from "../hdr-parse";
 import GLTFLoader from "../gltf-loader";
-import { Bolt, FLOAT, RGBA, RGBA16F, Texture2D, TextureCube } from "bolt-gl";
+import {
+  Bolt,
+  FLOAT,
+  RGBA,
+  RGBA16F,
+  Texture2D,
+  TextureCube,
+} from "../../index";
 
 interface QueueItem {
   url: string;

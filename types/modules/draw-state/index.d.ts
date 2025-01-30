@@ -1,0 +1,37 @@
+import { mat3, mat4, vec2, vec3, vec4 } from "gl-matrix";
+import { Bolt, FBO, Mesh, TextureCube, Texture2D, Viewport, DrawSet, VBO, AttribPointer, TypedArray, Node } from "../../";
+export default class DrawState {
+    protected _bolt: Bolt;
+    protected _fbo: FBO | undefined;
+    protected _drawSet: DrawSet | undefined;
+    protected _instanceCount: number;
+    protected _mesh?: Mesh;
+    protected _viewport: Viewport | undefined;
+    private _clearColor;
+    private _cullFace;
+    private _node;
+    constructor(bolt: Bolt);
+    setMesh(mesh: Mesh): this;
+    setDrawSet(drawSet: DrawSet): this;
+    setNode(node: Node): this;
+    uniformFloat(uniform: string, value: number): this;
+    uniformVector2(uniform: string, value: vec2): this;
+    uniformVector3(uniform: string, value: vec3): this;
+    uniformVector4(uniform: string, value: vec4): this;
+    uniformMatrix3(uniform: string, value: mat3): this;
+    uniformMatrix4(uniform: string, value: mat4): this;
+    uniformInt(uniform: string, value: number): this;
+    uniformBoolean(uniform: string, value: number): this;
+    uniformTexture(uniform: string, texture: TextureCube | Texture2D): this;
+    setAttribute(buffer: TypedArray, size: number, layoutID: number | AttribPointer, type: number, offset: number, divisor: number): this;
+    setInstanceCount(count: number): this;
+    setVbo(vbo: VBO, size: number, layoutID: number | AttribPointer, type: number, offset: number, divisor: number): this;
+    setFbo(fbo: FBO): this;
+    clear(r: number, g: number, b: number, a: number): this;
+    setCullFace(face: number): this;
+    setScissor(offsetX: number, offsetY: number, width: number, height: number): this;
+    setViewport(offsetX: number, offsetY: number, width: number, height: number): this;
+    draw(): this;
+    get drawSet(): DrawSet | undefined;
+    set drawSet(value: DrawSet | undefined);
+}

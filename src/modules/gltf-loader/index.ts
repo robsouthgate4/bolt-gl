@@ -21,7 +21,7 @@ import {
   UNSIGNED_SHORT,
   INT,
   UNSIGNED_INT,
-} from "bolt-gl";
+} from "../../index";
 
 import SkinMesh from "./SkinMesh";
 import Skin from "./Skin";
@@ -1110,7 +1110,7 @@ export default class GLTFLoader {
     const n = new Node();
     n.name = name;
     n.transform = trs;
-    
+
     node.skin = skin;
 
     return {

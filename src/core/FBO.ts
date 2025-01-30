@@ -12,9 +12,10 @@ import {
   RENDERBUFFER,
   COLOR_BUFFER_BIT,
   LINEAR,
-  DEPTH_COMPONENT16,
+  DEPTH_COMPONENT24,
   UNSIGNED_BYTE,
   RGBA,
+  UNSIGNED_INT,
 } from "./Constants";
 import Bolt from "./Bolt";
 import RBO from "./RBO";
@@ -38,6 +39,7 @@ export default class FBO {
   private _msaaDepthBuffer!: WebGLRenderbuffer | null;
   private _name: string;
   private _rbo: RBO | undefined;
+  private _msaaDepthTexture!: Texture2D;
 
   constructor({
     width = 256,
@@ -83,14 +85,10 @@ export default class FBO {
     // if sample count provided, create a multisampled framebuffer
     if (this._isMSAA) {
       this.initMSAA();
-
       /**
        * Attach depth buffer and setup texture if depth is true
        */
-      if (depth) {
-        this.attachDepthTexture();
-      } else {
-        // if not depth texture, attach a render buffer
+      if (!depth) {
         this.attachRBO();
       }
 
@@ -140,7 +138,7 @@ export default class FBO {
     this._gl.renderbufferStorageMultisample(
       RENDERBUFFER,
       this._samples,
-      DEPTH_COMPONENT16,
+      DEPTH_COMPONENT24,
       this._width,
       this._height
     );
@@ -161,6 +159,7 @@ export default class FBO {
       FRAMEBUFFER,
       this._MSAAFramebuffers[this._msaaBuffers.RENDERBUFFER]
     );
+
     this._gl.framebufferRenderbuffer(
       FRAMEBUFFER,
       DEPTH_ATTACHMENT,
@@ -180,12 +179,14 @@ export default class FBO {
       RENDERBUFFER,
       this._msaaColorRenderBuffer
     );
+
     this._gl.bindFramebuffer(FRAMEBUFFER, null);
 
     this._gl.bindFramebuffer(
       FRAMEBUFFER,
       this._MSAAFramebuffers[this._msaaBuffers.COLORBUFFER]
     );
+
     this._gl.framebufferTexture2D(
       FRAMEBUFFER,
       COLOR_ATTACHMENT0,
@@ -193,6 +194,29 @@ export default class FBO {
       this._targetTexture.texture,
       0
     );
+
+    if (this._depth) {
+      this._msaaDepthTexture = new Texture2D({
+        width: this._width,
+        height: this._height,
+        generateMipmaps: false,
+        internalFormat: DEPTH_COMPONENT24,
+        format: DEPTH_COMPONENT,
+        type: UNSIGNED_INT,
+        minFilter: NEAREST,
+        magFilter: NEAREST,
+        wrapS: CLAMP_TO_EDGE,
+        wrapT: CLAMP_TO_EDGE,
+      });
+      this._msaaDepthTexture.bind();
+      this._gl.framebufferTexture2D(
+        FRAMEBUFFER,
+        DEPTH_ATTACHMENT,
+        TEXTURE_2D,
+        this._msaaDepthTexture.texture,
+        0
+      );
+    }
   }
 
   private attachDepthTexture() {
@@ -274,7 +298,7 @@ export default class FBO {
     this._width = width;
     this._height = height;
 
-    if (this._depth && this._depthTexture) {
+    if (this._depth && this._depthTexture && !this._isMSAA) {
       this._depthTexture.resize(width, height);
     }
 
@@ -291,10 +315,11 @@ export default class FBO {
       this._gl.renderbufferStorageMultisample(
         RENDERBUFFER,
         this._samples,
-        DEPTH_COMPONENT16,
+        DEPTH_COMPONENT24,
         this._width,
         this._height
       );
+      console.log("this._msaaDepthBuffer", this._msaaDepthBuffer);
       this._gl.bindRenderbuffer(RENDERBUFFER, null);
 
       this._gl.bindRenderbuffer(RENDERBUFFER, this._msaaColorRenderBuffer);
@@ -305,6 +330,11 @@ export default class FBO {
         this._width,
         this._height
       );
+
+      if (this._depth) {
+        this._msaaDepthTexture.resize(width, height);
+      }
+
       this._gl.bindRenderbuffer(RENDERBUFFER, null);
     }
   }
@@ -320,6 +350,11 @@ export default class FBO {
         FRAMEBUFFER,
         this._MSAAFramebuffers[this._msaaBuffers.RENDERBUFFER]
       );
+
+      if (this._depth) {
+        this._gl.clearBufferfv(this._gl.DEPTH, 0, [1.0, 1.0, 1.0, 1.0]);
+      }
+
       this._gl.clearBufferfv(this._gl.COLOR, 0, [1.0, 1.0, 1.0, 1.0]);
     } else {
       this._gl.bindFramebuffer(FRAMEBUFFER, this._frameBuffer);
@@ -343,11 +378,15 @@ export default class FBO {
         this._gl.READ_FRAMEBUFFER,
         this._MSAAFramebuffers[this._msaaBuffers.RENDERBUFFER]
       );
+
       this._gl.bindFramebuffer(
         this._gl.DRAW_FRAMEBUFFER,
         this._MSAAFramebuffers[this._msaaBuffers.COLORBUFFER]
       );
+
       this._gl.clearBufferfv(this._gl.COLOR, 0, [1.0, 1.0, 1.0, 1.0]);
+
+      // blit the color buffer
       this._gl.blitFramebuffer(
         0,
         0,
@@ -360,6 +399,24 @@ export default class FBO {
         COLOR_BUFFER_BIT,
         LINEAR
       );
+
+      if (this._depth) {
+        this._gl.clearBufferfv(this._gl.DEPTH, 0, [1.0, 1.0, 1.0, 1.0]);
+
+        // Blit the depth buffer
+        this._gl.blitFramebuffer(
+          0,
+          0,
+          this._width,
+          this._height,
+          0,
+          0,
+          this._width,
+          this._height,
+          this._gl.DEPTH_BUFFER_BIT,
+          this._gl.NEAREST
+        );
+      }
 
       this._gl.bindFramebuffer(FRAMEBUFFER, null);
     } else {
@@ -416,6 +473,10 @@ export default class FBO {
 
   public get depthTexture(): Texture2D | undefined {
     return this._depthTexture || undefined;
+  }
+
+  public get msaaDepthTexture(): Texture2D | undefined {
+    return this._msaaDepthTexture || undefined;
   }
 
   public get name(): string {

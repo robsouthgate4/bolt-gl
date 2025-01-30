@@ -268,6 +268,7 @@ export const TEXTURE29 = 34013;
 export const TEXTURE30 = 34014;
 export const TEXTURE31 = 34015;
 export const TEXTURE_2D = 3553;
+export const TEXTURE_2D_ARRAY = 35866;
 export const TEXTURE_3D = 32879;
 export const TEXTURE_BASE_LEVEL = 33084;
 export const TEXTURE_MAX_LEVEL = 33085;

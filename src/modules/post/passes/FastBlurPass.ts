@@ -1,4 +1,4 @@
-import { Bolt, Program, FBO, RBO } from "../../../";
+import { Bolt, Program, FBO, RBO, Texture2D } from "../../../";
 import { Pass } from "./Pass";
 
 import vertexShader from "./shaders/fast-blur/fast-blur.vert";
@@ -10,6 +10,7 @@ interface FastBlurPassParams {
   height: number;
   iterations?: number;
   customBlurShader?: string;
+  inputTexture?: Texture2D;
 }
 
 export default class FastBlurPass extends Pass {
@@ -17,7 +18,7 @@ export default class FastBlurPass extends Pass {
   public program!: Program;
   public fbo: FBO;
   private _rbo: RBO;
-
+  private _inputTexture?: Texture2D | undefined;
   constructor(
     bolt: Bolt,
     {
@@ -25,6 +26,7 @@ export default class FastBlurPass extends Pass {
       height = 256,
       iterations = 8,
       customBlurShader,
+      inputTexture = undefined,
     }: FastBlurPassParams
   ) {
     super(bolt, {
@@ -33,6 +35,7 @@ export default class FastBlurPass extends Pass {
     });
 
     this._hasCustomFBO = true;
+    this._inputTexture = inputTexture;
 
     this.fbo = new FBO({
       width: 1,
@@ -65,13 +68,16 @@ export default class FastBlurPass extends Pass {
     this.program.setVector2("resolution", vec2.fromValues(width, height));
   }
 
-  draw(readFBO: FBO, writeFBO: FBO, renderToScreen = true) {
+  draw(readFBO: FBO, writeFBO: FBO, renderToScreen = false) {
     for (let i = 0; i < this._iterations; i++) {
       const radius = this._iterations - i - 1;
 
       writeFBO.bind();
 
-      const map = i === 0 ? this.fbo.targetTexture : readFBO.targetTexture;
+      const map =
+        i === 0
+          ? this._inputTexture || this.fbo.targetTexture
+          : readFBO.targetTexture;
 
       this.program.activate();
       this.program.setTexture("map", map);
@@ -98,9 +104,16 @@ export default class FastBlurPass extends Pass {
       this.program.activate();
       this.program.setVector2("direction", vec2.fromValues(0, 0));
       this.program.setTexture("map", readFBO.targetTexture);
-      readFBO.targetTexture.bind(0);
       this._bolt.clear(0, 0, 0, 0);
       this.fullScreenTriangle.draw(this.program);
     }
+  }
+
+  get inputTexture(): Texture2D | undefined {
+    return this._inputTexture;
+  }
+
+  set inputTexture(value: Texture2D | undefined) {
+    this._inputTexture = value;
   }
 }

@@ -11,6 +11,7 @@ export default class VAO {
 
   constructor() {
     this._gl = Bolt.getInstance().getContext();
+    console.log(this._gl);
     this._arrayObject = <WebGLVertexArrayObject>this._gl.createVertexArray();
   }
 
@@ -104,5 +105,9 @@ export default class VAO {
 
   public set arrayObject(value: WebGLVertexArrayObject) {
     this._arrayObject = value;
+  }
+
+  public getVBO(id: string): VBO | VBOInstanced | undefined {
+    return this._vbos.find((vbo) => vbo.id === id);
   }
 }

@@ -8,15 +8,11 @@ import {
   FRAGMENT_SHADER,
   LINK_STATUS,
   ONE_MINUS_SRC_ALPHA,
-  RGBA,
-  SAMPLER_2D,
-  SAMPLER_CUBE,
   SRC_ALPHA,
   VERTEX_SHADER,
 } from "./Constants";
 import Bolt from "./Bolt";
 import Texture2D from "./Texture2D";
-import { FLOAT, RGBA32f } from "bolt-gl";
 
 let ID = -1;
 

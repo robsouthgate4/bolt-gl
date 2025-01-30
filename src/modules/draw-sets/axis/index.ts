@@ -1,6 +1,6 @@
 import { vec3 } from "gl-matrix";
 
-import { DrawSet, LINES, Mesh, Program } from "../../";
+import { DrawSet, LINES, Mesh, Program } from "../../../index";
 import vertexShader from "./shaders/axis.vert";
 import fragmentShader from "./shaders/axis.frag";
 

@@ -10,6 +10,7 @@ import RBO from "./core/RBO";
 import Program from "./core/Program";
 import Node from "./core/Node";
 import Mesh from "./core/Mesh";
+import InstancedMesh from "./core/InstancedMesh";
 import IBO from "./core/IBO";
 import FBO from "./core/FBO";
 import DrawSet from "./core/DrawSet";
@@ -65,6 +66,7 @@ export * from "./core/Types";
 export {
   Mesh,
   SkinMesh,
+  InstancedMesh,
   Camera,
   CameraPersp,
   CameraOrtho,
