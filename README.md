@@ -41,7 +41,7 @@ bolt.init(canvas, {
     powerPreference: "high-performance",
 })
 
-const canvas = bolt._gl.canvas;
+const canvas = bolt.getContext().canvas;
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
