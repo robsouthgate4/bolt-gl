@@ -1,6 +1,6 @@
 import {
-  DEPTH_STENCIL,
-  DEPTH_STENCIL_ATTACHMENT,
+  DEPTH_ATTACHMENT,
+  DEPTH_COMPONENT24,
   FRAMEBUFFER,
   RENDERBUFFER,
 } from "./Constants";
@@ -9,27 +9,39 @@ import Bolt from "./Bolt";
 export default class RBO {
   private _width = 256;
   private _height = 256;
-
+  private _attachment = DEPTH_ATTACHMENT;
+  private _internalFormat = DEPTH_COMPONENT24;
   private _gl: WebGL2RenderingContext;
   private _renderBuffer: WebGLRenderbuffer;
 
-  constructor({ width = 256, height = 256 } = {}) {
+  constructor({
+    width = 256,
+    height = 256,
+    internalFormat = DEPTH_COMPONENT24,
+    attachment = DEPTH_ATTACHMENT,
+  } = {}) {
     this._gl = Bolt.getInstance().getContext();
 
     this._width = width;
     this._height = height;
 
+    this._internalFormat = internalFormat;
+    this._attachment = attachment;
+
     this._renderBuffer = <WebGLRenderbuffer>this._gl.createRenderbuffer();
+
     this.bind();
+
     this._gl.renderbufferStorage(
       RENDERBUFFER,
-      DEPTH_STENCIL,
+      this._internalFormat,
       this._width,
       this._height
     );
+
     this._gl.framebufferRenderbuffer(
       FRAMEBUFFER,
-      DEPTH_STENCIL_ATTACHMENT,
+      this._attachment,
       RENDERBUFFER,
       this._renderBuffer
     );
@@ -42,7 +54,7 @@ export default class RBO {
     this._gl.bindRenderbuffer(RENDERBUFFER, this._renderBuffer);
     this._gl.renderbufferStorage(
       RENDERBUFFER,
-      DEPTH_STENCIL,
+      this._internalFormat,
       this._width,
       this._height
     );

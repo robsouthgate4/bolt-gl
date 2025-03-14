@@ -1,9 +1,11 @@
+import { TypedArray } from "./Types";
 export default class IBO {
     private _gl;
     private _count;
     private _indicesBuffer;
-    constructor(indices: Uint32Array | Uint16Array | Int16Array | Uint8Array);
+    constructor(indices: TypedArray | number, drawType?: number);
     bind(): void;
+    update(indices: TypedArray, offset?: number): void;
     unbind(): void;
     delete(): void;
     get indicesBuffer(): WebGLBuffer | null;

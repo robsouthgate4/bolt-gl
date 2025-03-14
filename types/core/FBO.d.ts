@@ -10,6 +10,7 @@ export default class FBO {
     private _attachmentTextures;
     private _bolt;
     private _depth;
+    private _stencil;
     private _MSAAFramebuffers;
     private _samples;
     private _isMSAA;
@@ -17,12 +18,14 @@ export default class FBO {
     private _msaaColorRenderBuffer;
     private _msaaDepthBuffer;
     private _name;
-    private _rbo;
+    private _rboDepth;
+    private _rboStencil;
     private _msaaDepthTexture;
-    constructor({ width, height, depth, samples, type, internalFormat, format, generateMipmaps, minFilter, magFilter, wrapS, wrapT, name, }?: {
+    constructor({ width, height, depth, stencil, samples, type, internalFormat, format, generateMipmaps, minFilter, magFilter, wrapS, wrapT, name, }?: {
         width?: number | undefined;
         height?: number | undefined;
         depth?: boolean | undefined;
+        stencil?: boolean | undefined;
         samples?: number | undefined;
         type?: number | undefined;
         internalFormat?: number | undefined;
@@ -36,7 +39,8 @@ export default class FBO {
     });
     private initMSAA;
     private attachDepthTexture;
-    private attachRBO;
+    private attachRBODepth;
+    private attachRBOSStencil;
     clear(r?: number, g?: number, b?: number, a?: number): void;
     /**
      * Add an attachment to the framebuffer ( multi render targets )

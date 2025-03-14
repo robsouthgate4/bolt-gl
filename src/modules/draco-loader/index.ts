@@ -36,8 +36,6 @@ export default class DracoLoader {
       [Uint32Array]: this._draco.DT_UINT32,
     };
 
-    console.log(this._draco);
-
     this.ATTRIB_ID = {
       positions: this._draco.POSITION,
       normals: this._draco.NORMAL,
@@ -82,7 +80,6 @@ export default class DracoLoader {
     const attId = decoder.GetAttributeId(geometry, this.ATTRIB_ID[key]);
 
     const uvId = decoder.GetAttributeId(geometry, this.ATTRIB_ID["uvs"]);
-    console.log("UV Attribute ID:", uvId);
 
     if (attId == -1) return null;
 

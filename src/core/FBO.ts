@@ -16,6 +16,11 @@ import {
   UNSIGNED_BYTE,
   RGBA,
   UNSIGNED_INT,
+  STENCIL_INDEX8,
+  DEPTH_STENCIL_ATTACHMENT,
+  DEPTH_STENCIL,
+  DEPTH24_STENCIL8,
+  UNSIGNED_INT_24_8,
 } from "./Constants";
 import Bolt from "./Bolt";
 import RBO from "./RBO";
@@ -31,6 +36,7 @@ export default class FBO {
   private _attachmentTextures: Texture2D[] = [];
   private _bolt: Bolt;
   private _depth: boolean;
+  private _stencil: boolean;
   private _MSAAFramebuffers: (WebGLFramebuffer | null)[] | null[] = [];
   private _samples: number;
   private _isMSAA = false;
@@ -38,13 +44,15 @@ export default class FBO {
   private _msaaColorRenderBuffer!: WebGLRenderbuffer | null;
   private _msaaDepthBuffer!: WebGLRenderbuffer | null;
   private _name: string;
-  private _rbo: RBO | undefined;
+  private _rboDepth: RBO | undefined;
+  private _rboStencil: RBO | undefined;
   private _msaaDepthTexture!: Texture2D;
 
   constructor({
     width = 256,
     height = 256,
     depth = false,
+    stencil = false,
     samples = 0,
     type = UNSIGNED_BYTE,
     internalFormat = RGBA,
@@ -57,16 +65,14 @@ export default class FBO {
     name = "",
   } = {}) {
     this._depth = depth;
+    this._stencil = stencil;
     this._bolt = Bolt.getInstance();
     this._gl = this._bolt.getContext();
 
     this._width = width;
     this._height = height;
-
     this._name = name;
-
     this._samples = samples;
-
     this._isMSAA = samples > 0;
 
     this._targetTexture = new Texture2D({
@@ -89,7 +95,7 @@ export default class FBO {
        * Attach depth buffer and setup texture if depth is true
        */
       if (!depth) {
-        this.attachRBO();
+        this.attachRBODepth();
       }
 
       this.unbind();
@@ -115,8 +121,13 @@ export default class FBO {
       if (depth) {
         this.attachDepthTexture();
       } else {
-        // if not depth texture, attach a render buffer
-        this.attachRBO();
+        // if no depth texture, attach a render buffer by default
+        this.attachRBODepth();
+
+        // attach a stencil buffer if stencil is true
+        if (stencil) {
+          this.attachRBOSStencil();
+        }
       }
 
       this.unbind();
@@ -220,13 +231,24 @@ export default class FBO {
   }
 
   private attachDepthTexture() {
+    // combine the depth and stencil if both are required
+    const internalFormat = this._stencil
+      ? DEPTH24_STENCIL8
+      : DEPTH_COMPONENT32F;
+
+    const format = this._stencil ? DEPTH_STENCIL : DEPTH_COMPONENT;
+    const type = this._stencil ? UNSIGNED_INT_24_8 : FLOAT;
+    const attachment = this._stencil
+      ? DEPTH_STENCIL_ATTACHMENT
+      : DEPTH_ATTACHMENT;
+
     this._depthTexture = new Texture2D({
       width: this._width,
       height: this._height,
       generateMipmaps: false,
-      internalFormat: DEPTH_COMPONENT32F,
-      format: DEPTH_COMPONENT,
-      type: FLOAT,
+      internalFormat,
+      format,
+      type,
       minFilter: NEAREST,
       magFilter: NEAREST,
       wrapS: CLAMP_TO_EDGE,
@@ -237,23 +259,43 @@ export default class FBO {
 
     this._gl.framebufferTexture2D(
       FRAMEBUFFER,
-      DEPTH_ATTACHMENT,
+      attachment,
       TEXTURE_2D,
       this._depthTexture.texture,
       0
     );
+
+    // Add error checking
+    const status = this._gl.checkFramebufferStatus(FRAMEBUFFER);
+    if (status !== this._gl.FRAMEBUFFER_COMPLETE) {
+      console.error("Framebuffer is incomplete:", status);
+    }
   }
 
-  private attachRBO() {
-    this._rbo = new RBO({
+  private attachRBODepth() {
+    this._rboDepth = new RBO({
       width: this._width,
       height: this._height,
     });
 
     this.bind();
-    this._rbo.bind();
+    this._rboDepth.bind();
     this.unbind();
-    this._rbo.unbind();
+    this._rboDepth.unbind();
+  }
+
+  private attachRBOSStencil() {
+    this._rboStencil = new RBO({
+      width: this._width,
+      height: this._height,
+      internalFormat: DEPTH_STENCIL,
+      attachment: DEPTH_STENCIL_ATTACHMENT,
+    });
+
+    this.bind();
+    this._rboStencil.bind();
+    this.unbind();
+    this._rboStencil.unbind();
   }
 
   clear(r = 0, g = 0, b = 0, a = 0) {
@@ -302,8 +344,12 @@ export default class FBO {
       this._depthTexture.resize(width, height);
     }
 
-    if (this._rbo) {
-      this._rbo.resize(width, height);
+    if (this._rboDepth) {
+      this._rboDepth.resize(width, height);
+    }
+
+    if (this._rboStencil) {
+      this._rboStencil.resize(width, height);
     }
 
     this._attachmentTextures.forEach((attachment: Texture2D) => {

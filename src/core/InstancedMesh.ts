@@ -31,7 +31,6 @@ export default class InstancedMesh extends Mesh {
       );
     }
     if (this._instanceMatrices) {
-      console.log(this.vao);
       this.vao.bind();
       const id = "3";
       const instancedVBO = new VBOInstanced(
@@ -80,7 +79,6 @@ export default class InstancedMesh extends Mesh {
       this.gl.vertexAttribDivisor(6, 1);
       instancedVBO.unbind();
       this.vao.unbind();
-      console.log(this);
     }
   }
   setMatrixAt(index: number, matrix: Float32Array) {

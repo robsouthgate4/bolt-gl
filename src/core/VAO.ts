@@ -11,7 +11,6 @@ export default class VAO {
 
   constructor() {
     this._gl = Bolt.getInstance().getContext();
-    console.log(this._gl);
     this._arrayObject = <WebGLVertexArrayObject>this._gl.createVertexArray();
   }
 

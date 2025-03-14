@@ -1,22 +1,41 @@
 import { ELEMENT_ARRAY_BUFFER, STATIC_DRAW } from "./Constants";
 import Bolt from "./Bolt";
+import { TypedArray } from "./Types";
 
 export default class IBO {
   private _gl!: WebGL2RenderingContext;
   private _count!: number;
   private _indicesBuffer!: WebGLBuffer | null;
 
-  constructor(indices: Uint32Array | Uint16Array | Int16Array | Uint8Array) {
+  constructor(indices: TypedArray | number, drawType = STATIC_DRAW) {
     this._gl = Bolt.getInstance().getContext();
-    this._count = indices.length;
+    if (typeof indices === "number") {
+      // you can provide a max allocation instead of data
+      this._count = indices;
+    } else {
+      this._count = indices.length;
+    }
     this._indicesBuffer = this._gl.createBuffer();
     this._gl.bindBuffer(ELEMENT_ARRAY_BUFFER, this._indicesBuffer);
-
-    this._gl.bufferData(ELEMENT_ARRAY_BUFFER, indices, STATIC_DRAW);
+    if (typeof indices === "number") {
+      // you can provide a max allocation instead of data
+      this._gl.bufferData(ELEMENT_ARRAY_BUFFER, indices, drawType);
+    } else {
+      this._gl.bufferData(ELEMENT_ARRAY_BUFFER, indices, drawType);
+    }
   }
 
   bind() {
     this._gl.bindBuffer(ELEMENT_ARRAY_BUFFER, this.indicesBuffer);
+  }
+
+  update(indices: TypedArray, offset = 0) {
+    this.bind();
+    this._gl.bufferSubData(ELEMENT_ARRAY_BUFFER, offset, indices);
+    this.unbind();
+    if (indices && indices.length) {
+      this._count += indices.length;
+    }
   }
 
   unbind() {

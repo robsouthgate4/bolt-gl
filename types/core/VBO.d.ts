@@ -4,7 +4,7 @@ export default class VBO {
     private _buffer;
     private _drawType;
     private _id;
-    constructor(data: TypedArray, drawType?: number, id?: string);
+    constructor(data: TypedArray | number, drawType?: number, id?: string);
     bind(): void;
     unbind(): void;
     update(data: TypedArray, offset?: number): void;

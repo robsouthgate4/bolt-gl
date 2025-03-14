@@ -19,6 +19,14 @@ export default {
       sourcemap: true,
     },
   ],
+  onwarn: (warning, warn) => {
+    // Suppress sourcemap warnings about missing source files
+    if (warning.message && warning.message.includes("points to missing source files")) {
+      return;
+    }
+    // Use default for everything else
+    warn(warning);
+  },
   plugins: [
     peerDepsExternal(), // Prevent bundling of peer dependencies
     resolve({
@@ -32,7 +40,15 @@ export default {
       clean: true,
       useTsconfigDeclarationDir: true,
     }),
-    terser(), // Minify for production
+    // terser({
+    //   compress: {
+    //     keep_fargs: true,
+    //   },
+    //   mangle: {
+    //     keep_classnames: true,
+    //     keep_fnames: true,
+    //   },
+    // }), // Minify for production
   ],
   treeshake: {
     moduleSideEffects: false,
