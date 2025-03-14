@@ -60,7 +60,7 @@ export default class Program {
 
     this._uniforms = {};
 
-    this.linkShaders(vertexShaderSrc, fragmentShaderSrc);
+    this.linkShaders(this._vertexShaderSource, this._fragmentShaderSource);
 
     this._program = <WebGLProgram>this._gl.createProgram();
 
