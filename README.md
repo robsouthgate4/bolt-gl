@@ -26,7 +26,7 @@ npm install bolt-gl
 ## 🚦 Quick Start
 
 ```javascript
-import { Bolt, Program, DrawSet } from 'bolt-gl';
+import { Bolt, Program, DrawSet, Mesh } from 'bolt-gl';
 
 // Initialize Bolt
 const bolt = Bolt.getInstance();
