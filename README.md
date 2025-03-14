@@ -15,7 +15,7 @@ Bolt is a modern, lightweight WebGL2 framework designed for high-performance gra
 - **🎯 Framebuffer Objects**: Comprehensive FBO support with MSAA
 - **⚡ Transform Feedback simulations**
 - **☁️ Point Cloud Rendering**: Efficient Houdini point cloud data handling and rendering
-- **🌍 Scene Management**: Built-in bllender scene loading and management capabilities
+- **🌍 Scene Management**: Built-in Blender scene loading and management capabilities
 
 ## 📦 Installation
 
