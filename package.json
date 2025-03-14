@@ -1,7 +1,7 @@
 {
   "name": "bolt-gl",
   "description": "Bolt WebGL library",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "main": "build/cjs/index.js",
   "module": "build/esm/index.js",
   "exports": {
