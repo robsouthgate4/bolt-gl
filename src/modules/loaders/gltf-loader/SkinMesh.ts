@@ -1,5 +1,17 @@
-import { flattenFloatArray } from "../../core/GLUtils";
-import { Mesh, Node, Program, GeometryBuffers, MeshParams, Texture2D,  RGBA, CLAMP_TO_EDGE, NEAREST, FLOAT, RGBA32f, RGB, Bolt } from "../../";
+import { flattenFloatArray } from "../../../core/GLUtils";
+import {
+  Mesh,
+  Node,
+  Program,
+  GeometryBuffers,
+  MeshParams,
+  Texture2D,
+  RGBA,
+  CLAMP_TO_EDGE,
+  NEAREST,
+  FLOAT,
+  RGBA32f,
+} from "../../../";
 import Skin from "./Skin";
 
 export default class SkinMesh extends Mesh {
@@ -29,34 +41,29 @@ export default class SkinMesh extends Mesh {
       flipY: false,
     });
 
-    this._jointTexture.setFromData(
-      skin.jointData,
-      4,
-      skin.joints.length
-    );
+    this._jointTexture.setFromData(skin.jointData, 4, skin.joints.length);
 
     this._jointTexture.name = "jointTexture";
   }
 
   draw(program: Program, node: Node) {
-    
     if (!this._skin || !node) return;
-    
+
     this._skin.update(node!, program, this._jointTexture);
-    
+
     program.activate();
-    
+
     program.setMatrix4(
       "jointTransforms",
       flattenFloatArray(this.skin!.jointMatrices)
-      );
-      
-      program.setFloat("jointCount", this._skin.joints.length);
-      
-      if (this._jointTexture !== undefined) {
-        program.setTexture("jointTexture", this._jointTexture);
-      }
-      
+    );
+
+    program.setFloat("jointCount", this._skin.joints.length);
+
+    if (this._jointTexture !== undefined) {
+      program.setTexture("jointTexture", this._jointTexture);
+    }
+
     super.draw(program);
   }
 

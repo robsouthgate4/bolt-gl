@@ -21,7 +21,7 @@ import {
   UNSIGNED_SHORT,
   INT,
   UNSIGNED_INT,
-} from "../../index";
+} from "../../../index";
 
 import SkinMesh from "./SkinMesh";
 import Skin from "./Skin";

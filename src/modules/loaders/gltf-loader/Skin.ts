@@ -1,9 +1,4 @@
-
-import {
-  Node,
-  Program,
-  Texture2D,
-} from "../../";
+import { Node, Program, Texture2D } from "../../../";
 import { mat4 } from "gl-matrix";
 
 export default class Skin {
@@ -26,7 +21,7 @@ export default class Skin {
         new Float32Array(
           inverseBindMatrixData.buffer,
           inverseBindMatrixData.byteOffset +
-          Float32Array.BYTES_PER_ELEMENT * mat4size * i,
+            Float32Array.BYTES_PER_ELEMENT * mat4size * i,
           mat4size
         )
       );
@@ -39,7 +34,6 @@ export default class Skin {
         )
       );
     }
-
   }
 
   update(node: Node, program: Program, jointTexture: Texture2D | undefined) {
@@ -57,13 +51,8 @@ export default class Skin {
     }
 
     if (jointTexture !== undefined) {
-      jointTexture.setFromData(
-        this.jointData,
-        1,
-        this._joints.length
-      );
+      jointTexture.setFromData(this.jointData, 1, this._joints.length);
     }
-
   }
 
   public get jointData(): Float32Array {

@@ -28,7 +28,7 @@ import GLTFLoader, {
   GLTFScene,
   Channel,
   KeyFrame,
-} from "./modules/gltf-loader";
+} from "./modules/loaders/gltf-loader";
 import DrawState from "./modules/draw-state";
 import EventListeners from "./modules/event-listeners";
 import FBOSim, { FBOSwapDefinition } from "./modules/fbo-sim";
@@ -57,7 +57,7 @@ import { GL_KEYUP_TOPIC } from "./modules/event-listeners/constants";
 import Cube from "./modules/primitives/Cube";
 import Plane from "./modules/primitives/Plane";
 import Sphere from "./modules/primitives/Sphere";
-import SkinMesh from "./modules/gltf-loader/SkinMesh";
+import SkinMesh from "./modules/loaders/gltf-loader/SkinMesh";
 
 export * from "./core/GLUtils";
 export * from "./core/Constants";

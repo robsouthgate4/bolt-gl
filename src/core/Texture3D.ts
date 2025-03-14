@@ -53,7 +53,7 @@ export default class Texture3D extends Texture {
   }
 
   init(): void {
-    this._texture = this._gl.createTexture();
+    this._texture = <WebGLTexture>this._gl.createTexture();
     this.bind();
     this._gl.texImage3D(
       TEXTURE_3D,

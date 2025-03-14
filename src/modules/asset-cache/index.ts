@@ -3,7 +3,7 @@
 import pMap from "p-map";
 
 import parseHdr from "../hdr-parse";
-import GLTFLoader from "../gltf-loader";
+import GLTFLoader from "../loaders/gltf-loader";
 import {
   Bolt,
   FLOAT,
