@@ -26,62 +26,95 @@ npm install bolt-gl
 ## 🚦 Quick Start
 
 ```javascript
-import { Bolt, Program, DrawSet, Mesh } from 'bolt-gl';
+import { Bolt, CameraPersp, DrawSet, Mesh, Program, Cube } from 'bolt-gl';
+import { vec3 } from 'gl-matrix';
 
 // Initialize Bolt
 const bolt = Bolt.getInstance();
-const canvas = document.getElementById('canvas');
 
-const dpi = 1;
+const canvas = document.getElementById('canvas');
 
 bolt.init(canvas, {
     alpha: true,
     antialias: false,
-    dpi,
+    dpi: 1,
     powerPreference: "high-performance",
 })
 
-bolt.resizeCanvasToDisplay();
-bolt.setViewPort( 0, 0, canvas.width, canvas.height);
+const canvas = bolt._gl.canvas;
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
 
-const clearColor = [1, 1, 1, 1];
+const camera = new CameraPersp( {
+    aspect: canvas.width / canvas.height,
+    fov: 45,
+    far: 1000,
+    position: vec3.fromValues( 0, 0, 5 ),
+    target: vec3.fromValues( 0, 0, 0 ),
+} );
 
-// Create a simple triangle
-const positions = new Float32Array([
-  -0.5, -0.5, 0.0,
-   0.5, -0.5, 0.0,
-   0.0,  0.5, 0.0
-]);
+bolt.setCamera( camera );
+bolt.enableDepth();
 
-const mesh = new Mesh({ positions });
-
-// Create and use a program
-const program = new Program({
-  vertex: `
-    #version 300 es
-    in vec3 position;
-    void main() {
-      gl_Position = vec4(position, 1.0);
-    }
-  `,
-  fragment: `
-    #version 300 es
-    precision highp float;
-    out vec4 fragColor;
-    void main() {
-      fragColor = vec4(1.0, 0.0, 0.0, 1.0);
-    }
-  `
+window.addEventListener('resize', () => {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    camera.updateProjection(canvas.width / canvas.height);
 });
 
-const drawSet = new DrawSet(mesh, program);
+const cube = new DrawSet(
+    new Mesh(new Cube()),
+    new Program(`
+        #version 300 es
+        precision highp float;
 
-// Render loop
-function render() {
-  bolt.clear(...clearColor);
-  bolt.setViewPort( 0, 0, canvas.width, canvas.height );
-  bolt.draw(drawSet);
-  requestAnimationFrame(render);
+        layout(location = 0) in vec3 aPosition;
+        layout(location = 1) in vec3 aNormal;
+        layout(location = 2) in vec2 aUv;
+
+        out vec3 Normal;
+        out vec2 Uv;
+
+        uniform mat4 projection;
+        uniform mat4 model;
+        uniform mat4 view;
+        uniform mat4 normal;
+
+        void main() {
+            Normal = aNormal;
+            Uv = aUv;
+            gl_Position = projection * view * model * vec4(aPosition, 1.0);
+        }`, 
+        `
+        #version 300 es
+        precision highp float;
+        out vec4 FragColor;
+
+        in vec3 Normal;
+        
+        in vec2 Uv;
+
+        in vec3 Color;
+
+        uniform float uTime;
+
+        void main() {
+            FragColor = vec4(Normal * 0.5 + 0.5, 1.0);
+        }`)
+            
+    );
+
+const render = () => {
+
+    bolt.clear(1,1,1,1);
+    bolt.setViewPort(0, 0, canvas.width, canvas.height);
+
+    cube.transform.rotateY(0.01);
+    cube.transform.rotateX(0.01);
+    cube.transform.rotateZ(-0.01);
+    bolt.draw(cube);
+
+    requestAnimationFrame(render);
 }
 
 render();
