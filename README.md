@@ -13,8 +13,9 @@ Bolt is a modern, lightweight WebGL2 framework designed for high-performance gra
   - Multiple Render Targets
   - Depth and Stencil Textures
 - **🎯 Framebuffer Objects**: Comprehensive FBO support with MSAA
-- **☁️ Point Cloud Rendering**: Efficient point cloud data handling and rendering
-- **🌍 Scene Management**: Built-in scene loading and management capabilities
+- **⚡ Transform Feedback simulations**
+- **☁️ Point Cloud Rendering**: Efficient Houdini point cloud data handling and rendering
+- **🌍 Scene Management**: Built-in bllender scene loading and management capabilities
 
 ## 📦 Installation
 
@@ -25,7 +26,7 @@ npm install bolt-gl
 ## 🚦 Quick Start
 
 ```javascript
-import { Bolt, Program, Mesh } from 'bolt-gl';
+import { Bolt, Program, DrawSet } from 'bolt-gl';
 
 // Initialize Bolt
 const bolt = Bolt.getInstance();
@@ -148,7 +149,7 @@ tf.bindVAOS([
 tf.compute(tfProgram);
 ```
 
-### ☁️ Point Cloud Loading
+### ☁️ Houdini Point Cloud Loading
 
 ```javascript
 const loader = new BoltPointCloudLoader();
@@ -156,7 +157,7 @@ await loader.load('path/to/pointcloud.boltpc');
 const points = loader.points;
 ```
 
-### 🌍 Scene Loader
+### 🌍 Blender Scene Loader
 
 ```javascript
 const boltSceneLoader = new BoltSceneLoader();
