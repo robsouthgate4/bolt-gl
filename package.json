@@ -39,7 +39,6 @@
     "gl-matrix": "^3.4.3"
   },
   "dependencies": {
-    "bolt-gl": "file:.yalc/bolt-gl",
     "fflate": "^0.8.2",
     "gl-matrix": "^3.4.3",
     "os-browserify": "^0.3.0",
