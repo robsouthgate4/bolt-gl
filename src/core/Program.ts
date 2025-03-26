@@ -240,6 +240,7 @@ export default class Program {
   }
 
   setBool(uniform: string, value: number) {
+    this.activate();
     const location = this.getLocation(uniform);
     if (!location) return;
     this._gl.uniform1i(location, +value);
@@ -247,6 +248,7 @@ export default class Program {
   }
 
   setInt(uniform: string, value: number) {
+    this.activate();
     const location = this.getLocation(uniform);
     if (!location) return;
     this._gl.uniform1i(location, value);
@@ -254,6 +256,7 @@ export default class Program {
   }
 
   setFloat(uniform: string, value: number) {
+    this.activate();
     const location = this.getLocation(uniform);
     if (!location) return;
     this._uniforms[uniform] = { location, value };
@@ -261,6 +264,7 @@ export default class Program {
   }
 
   setVector2(uniform: string, value: vec2) {
+    this.activate();
     const location = this.getLocation(uniform);
     if (!location) return;
     this._gl.uniform2fv(location, value);
@@ -268,6 +272,7 @@ export default class Program {
   }
 
   setVector3(uniform: string, value: vec3) {
+    this.activate();
     const location = this.getLocation(uniform);
     if (!location) return;
     this._gl.uniform3fv(location, value);
@@ -275,6 +280,7 @@ export default class Program {
   }
 
   setVector4(uniform: string, value: vec4) {
+    this.activate();
     const location = this.getLocation(uniform);
     if (!location) return;
     this._gl.uniform4fv(location, value);
@@ -282,6 +288,7 @@ export default class Program {
   }
 
   setMatrix2(uniform: string, value: mat2) {
+    this.activate();
     const location = this.getLocation(uniform);
     if (!location) return;
     this._gl.uniformMatrix2fv(location, false, value);
@@ -289,6 +296,7 @@ export default class Program {
   }
 
   setMatrix3(uniform: string, value: mat3) {
+    this.activate();
     const location = this.getLocation(uniform);
     if (!location) return;
     this._gl.uniformMatrix3fv(location, false, value);
@@ -296,6 +304,7 @@ export default class Program {
   }
 
   setMatrix4(uniform: string, value: mat4) {
+    this.activate();
     const location = this.getLocation(uniform);
     if (!location) return;
     this._gl.uniformMatrix4fv(location, false, value);
@@ -303,6 +312,7 @@ export default class Program {
   }
 
   setTexture(uniform: string, texture: Texture | TextureCube) {
+    this.activate();
     const location = this.getLocation(uniform);
     if (!location) return;
 
