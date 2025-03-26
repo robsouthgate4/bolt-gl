@@ -20,6 +20,8 @@ export default class Program {
     constructor(vertexShaderSrc: string, fragmentShaderSrc: string, parameters?: {
         transformFeedbackVaryings: string[];
     });
+    private applySettings;
+    private shaderPreprocessor;
     private linkUniforms;
     private linkShaders;
     setBool(uniform: string, value: number): void;

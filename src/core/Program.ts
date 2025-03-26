@@ -5,8 +5,11 @@ import TextureCube from "./TextureCube";
 import Texture from "./Texture";
 import {
   ACTIVE_UNIFORMS,
+  BACK,
   FRAGMENT_SHADER,
+  FRONT,
   LINK_STATUS,
+  NONE,
   ONE_MINUS_SRC_ALPHA,
   SRC_ALPHA,
   VERTEX_SHADER,
@@ -50,8 +53,11 @@ export default class Program {
     this._bolt = Bolt.getInstance();
     this._gl = Bolt.getInstance().getContext();
 
-    this._vertexShaderSource = vertexShaderSrc.trim();
-    this._fragmentShaderSource = fragmentShaderSrc.trim();
+    const processedVertexShader = vertexShaderSrc.trim();
+    const processedFragmentShader = this.shaderPreprocessor(fragmentShaderSrc);
+
+    this._vertexShaderSource = processedVertexShader;
+    this._fragmentShaderSource = processedFragmentShader.shaderSource;
 
     this._vertexShader = <WebGLShader>this._gl.createShader(VERTEX_SHADER);
     this._fragmentShader = <WebGLShader>this._gl.createShader(FRAGMENT_SHADER);
@@ -63,6 +69,9 @@ export default class Program {
     this.linkShaders(this._vertexShaderSource, this._fragmentShaderSource);
 
     this._program = <WebGLProgram>this._gl.createProgram();
+
+    //apply settings
+    this.applySettings(processedFragmentShader.settings);
 
     this._gl.attachShader(this._program, this._vertexShader);
     this._gl.attachShader(this._program, this._fragmentShader);
@@ -82,6 +91,54 @@ export default class Program {
 
     this._gl.deleteShader(this._vertexShader);
     this._gl.deleteShader(this._fragmentShader);
+  }
+
+  private applySettings(settings: Record<string, Record<string, string>>) {
+    const CULL_MODES = {
+      back: BACK,
+      front: FRONT,
+      none: NONE,
+    } as const;
+
+    if (settings.CULL) {
+      this._cullFace =
+        CULL_MODES[settings.CULL.mode as keyof typeof CULL_MODES] ?? BACK;
+    }
+  }
+
+  private shaderPreprocessor(shaderSource: string) {
+    const potentialSettings = ["STENCIL", "BLEND", "CULL"];
+
+    const settingsObject: Record<string, Record<string, string>> = {};
+    let newShaderString = shaderSource;
+
+    for (const setting of potentialSettings) {
+      const regex = new RegExp(`#pragma ${setting}\\s*\\{([^}]+)\\}`);
+      const match = shaderSource.match(regex);
+
+      if (match) {
+        const blockContent = match[1].trim();
+        settingsObject[setting] = {};
+
+        // Convert each line into key-value pairs
+        blockContent.split("\n").forEach((line) => {
+          const [key, value] = line
+            .trim()
+            .split(":")
+            .map((s) => s.trim());
+
+          if (key && value !== undefined) {
+            settingsObject[setting][key] = value.toString();
+          }
+        });
+        newShaderString = newShaderString.replace(regex, "").trim();
+      }
+    }
+
+    return {
+      shaderSource: newShaderString.trim(),
+      settings: settingsObject,
+    };
   }
 
   private linkUniforms() {
