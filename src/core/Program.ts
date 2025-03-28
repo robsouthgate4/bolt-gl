@@ -1,6 +1,11 @@
 import { mat2, mat3, mat4, vec2, vec3, vec4 } from "gl-matrix";
 
-import { BlendOptions, TextureObject, UniformObject } from "./Types";
+import {
+  BlendOptions,
+  StencilOptions,
+  TextureObject,
+  UniformObject,
+} from "./Types";
 import TextureCube from "./TextureCube";
 import Texture from "./Texture";
 import {
@@ -36,6 +41,7 @@ export default class Program {
   private _cullFace?: number | undefined = undefined;
   private _id = ID;
   private _bolt: Bolt;
+  private _stencilSettings: Record<string, string> = {};
 
   protected _gl: WebGL2RenderingContext;
 
@@ -99,6 +105,17 @@ export default class Program {
       front: FRONT,
       none: NONE,
     } as const;
+
+    if (settings.STENCIL) {
+      this._stencilSettings = {
+        ref: settings.STENCIL.ref,
+        writeMask: settings.STENCIL.writeMask,
+        func: settings.STENCIL.func,
+        fail: settings.STENCIL.fail,
+        zFail: settings.STENCIL.zFail,
+        pass: settings.STENCIL.pass,
+      };
+    }
 
     if (settings.CULL) {
       this._cullFace =
@@ -437,6 +454,14 @@ export default class Program {
 
   public set cullFace(value: number) {
     this._cullFace = value;
+  }
+
+  public get stencilSettings(): Record<string, string> {
+    return this._stencilSettings;
+  }
+
+  public set stencilSettings(value: Record<string, string>) {
+    this._stencilSettings = value;
   }
 
   public get id(): number {

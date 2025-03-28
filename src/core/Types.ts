@@ -95,3 +95,12 @@ export interface BlendOptions {
   src: number;
   dst: number;
 }
+
+export interface StencilOptions {
+  ref: keyof WebGL2RenderingContext;
+  writeMask: keyof WebGL2RenderingContext;
+  func: keyof WebGL2RenderingContext;
+  fail: keyof WebGL2RenderingContext;
+  zFail: keyof WebGL2RenderingContext;
+  pass: keyof WebGL2RenderingContext;
+}

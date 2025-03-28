@@ -15,7 +15,9 @@ import {
   NONE,
   ONE,
   ONE_MINUS_SRC_ALPHA,
+  SCISSOR_TEST,
   SRC_ALPHA,
+  STENCIL_TEST,
 } from "./Constants";
 import Camera from "./Camera";
 
@@ -187,14 +189,22 @@ export default class Bolt {
    * enable scissor test
    */
   enableScissor() {
-    this._gl.enable(this._gl.SCISSOR_TEST);
+    this._gl.enable(SCISSOR_TEST);
   }
 
   /**
    * disable scissor test
    */
   disableScissor() {
-    this._gl.disable(this._gl.SCISSOR_TEST);
+    this._gl.disable(SCISSOR_TEST);
+  }
+
+  enableStencil() {
+    this._gl.enable(STENCIL_TEST);
+  }
+
+  disableStencil() {
+    this._gl.disable(STENCIL_TEST);
   }
 
   /**

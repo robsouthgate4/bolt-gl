@@ -70,6 +70,8 @@ export default class Bolt {
      * disable scissor test
      */
     disableScissor(): void;
+    enableStencil(): void;
+    disableStencil(): void;
     /**
      * Returns gl context
      */
