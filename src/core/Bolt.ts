@@ -207,6 +207,13 @@ export default class Bolt {
     this._gl.disable(STENCIL_TEST);
   }
 
+  setStencilOperation(fail: number, zFail: number, pass: number) {
+    this._gl.stencilOp(fail, zFail, pass);
+  }
+
+  setStencilFunc(func: number, ref: number, mask: number) {
+    this._gl.stencilFunc(func, ref, mask);
+  }
   /**
    * Returns gl context
    */
@@ -319,6 +326,20 @@ export default class Bolt {
             this.cullFace(program.cullFace);
           }
           this._currentCullFace = program.cullFace;
+        }
+
+        // check
+        if (Object.keys(program.stencilSettings).length > 0) {
+          // this.setStencilOperation(
+          //   // program.stencilSettings.fail,
+          //   // program.stencilSettings.zFail,
+          //   // program.stencilSettings.pass
+          // );
+          // this.setStencilFunc(
+          //   program.stencilSettings.func,
+          //   program.stencilSettings.ref,
+          //   program.stencilSettings.mask
+          // );
         }
 
         if (node.mesh.depthWrite) {

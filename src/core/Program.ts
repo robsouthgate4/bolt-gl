@@ -10,12 +10,22 @@ import TextureCube from "./TextureCube";
 import Texture from "./Texture";
 import {
   ACTIVE_UNIFORMS,
+  ALWAYS,
   BACK,
+  EQUAL,
   FRAGMENT_SHADER,
   FRONT,
+  GEQUAL,
+  GREATER,
+  KEEP,
+  LEQUAL,
+  LESS,
   LINK_STATUS,
+  NEVER,
   NONE,
+  NOTEQUAL,
   ONE_MINUS_SRC_ALPHA,
+  REPLACE,
   SRC_ALPHA,
   VERTEX_SHADER,
 } from "./Constants";
@@ -41,7 +51,20 @@ export default class Program {
   private _cullFace?: number | undefined = undefined;
   private _id = ID;
   private _bolt: Bolt;
-  private _stencilSettings: Record<string, string> = {};
+  private _stencilSettings: Record<string, number> = {};
+
+  private _stencilDictionary: Record<string, number> = {
+    keep: KEEP,
+    replace: REPLACE,
+    always: ALWAYS,
+    never: NEVER,
+    less: LESS,
+    lequal: LEQUAL,
+    greater: GREATER,
+    gequal: GEQUAL,
+    equal: EQUAL,
+    notequal: NOTEQUAL,
+  };
 
   protected _gl: WebGL2RenderingContext;
 
@@ -108,12 +131,12 @@ export default class Program {
 
     if (settings.STENCIL) {
       this._stencilSettings = {
-        ref: settings.STENCIL.ref,
-        writeMask: settings.STENCIL.writeMask,
-        func: settings.STENCIL.func,
-        fail: settings.STENCIL.fail,
-        zFail: settings.STENCIL.zFail,
-        pass: settings.STENCIL.pass,
+        ref: this._stencilDictionary[settings.STENCIL.ref],
+        writeMask: parseInt(settings.STENCIL.writeMask),
+        func: this._stencilDictionary[settings.STENCIL.func],
+        fail: this._stencilDictionary[settings.STENCIL.fail],
+        zFail: this._stencilDictionary[settings.STENCIL.zFail],
+        pass: this._stencilDictionary[settings.STENCIL.pass],
       };
     }
 
@@ -456,11 +479,11 @@ export default class Program {
     this._cullFace = value;
   }
 
-  public get stencilSettings(): Record<string, string> {
+  public get stencilSettings(): Record<string, number> {
     return this._stencilSettings;
   }
 
-  public set stencilSettings(value: Record<string, string>) {
+  public set stencilSettings(value: Record<string, number>) {
     this._stencilSettings = value;
   }
 
