@@ -29,7 +29,7 @@ interface SceneDataObject {
   isInstanced?: boolean;
 }
 
-export default class BoltSceneLoader {
+export default class BlenderSceneLoader {
   private objects: SceneObject[] = [];
   private materials: any[] = [];
   private path = "";

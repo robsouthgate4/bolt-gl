@@ -17,6 +17,7 @@ export default class Program {
     private _id;
     private _bolt;
     private _stencilSettings;
+    private _stencilDictionary;
     protected _gl: WebGL2RenderingContext;
     constructor(vertexShaderSrc: string, fragmentShaderSrc: string, parameters?: {
         transformFeedbackVaryings: string[];
@@ -60,7 +61,7 @@ export default class Program {
     set blendFunction(value: BlendOptions);
     get cullFace(): number;
     set cullFace(value: number);
-    get stencilSettings(): Record<string, string>;
-    set stencilSettings(value: Record<string, string>);
+    get stencilSettings(): Record<string, number>;
+    set stencilSettings(value: Record<string, number>);
     get id(): number;
 }

@@ -185,7 +185,7 @@ tf.compute(tfProgram);
 ### ☁️ Houdini Point Cloud Loading
 
 ```javascript
-const loader = new BoltPointCloudLoader();
+const loader = new PointCloudLoader();
 await loader.load('path/to/pointcloud.boltpc');
 const points = loader.points;
 ```
@@ -193,9 +193,9 @@ const points = loader.points;
 ### 🌍 Blender Scene Loader
 
 ```javascript
-const boltSceneLoader = new BoltSceneLoader();
-await boltSceneLoader.load('/models');
-const scene = boltSceneLoader;
+const BlenderSceneLoader = new BlenderSceneLoader();
+await BlenderSceneLoader.load('/models');
+const scene = BlenderSceneLoader;
 ```
 
 ## 📚 Documentation

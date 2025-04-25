@@ -72,6 +72,8 @@ export default class Bolt {
     disableScissor(): void;
     enableStencil(): void;
     disableStencil(): void;
+    setStencilOperation(fail: number, zFail: number, pass: number): void;
+    setStencilFunc(func: number, ref: number, mask: number): void;
     /**
      * Returns gl context
      */

@@ -1,8 +1,9 @@
-export default class BoltPointCloudLoader {
-    private points;
+export default class BlenderSceneLoader {
+    private objects;
+    private materials;
     private path;
     load(path: string): Promise<void>;
-    private loadData;
+    private loadScene;
     private loadCompressedBinary;
     private parseBinary;
 }

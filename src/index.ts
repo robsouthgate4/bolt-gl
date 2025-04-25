@@ -58,7 +58,8 @@ import Cube from "./modules/primitives/Cube";
 import Plane from "./modules/primitives/Plane";
 import Sphere from "./modules/primitives/Sphere";
 import SkinMesh from "./modules/loaders/gltf-loader/SkinMesh";
-
+import PointCloudLoader from "./modules/loaders/point-cloud-loader/PointCloudLoader";
+import BlenderSceneLoader from "./modules/loaders/scene-loader/BlenderSceneLoader";
 export * from "./core/GLUtils";
 export * from "./core/Constants";
 export * from "./core/Types";
@@ -90,6 +91,8 @@ export {
   DracoDecoder,
   DracoLoader,
   GLTFLoader,
+  PointCloudLoader,
+  BlenderSceneLoader,
   GLTFScene,
   Channel,
   KeyFrame,

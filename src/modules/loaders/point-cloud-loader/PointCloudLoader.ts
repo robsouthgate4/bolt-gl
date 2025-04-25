@@ -1,6 +1,6 @@
 import { gunzipSync } from "fflate";
 
-export default class BoltPointCloudLoader {
+export default class PointCloudLoader {
   private points: Float32Array = new Float32Array();
   private path = "";
 
