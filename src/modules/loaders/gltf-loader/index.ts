@@ -827,11 +827,9 @@ export default class GLTFLoader {
   private _flattenHierarchy: boolean;
   private _drawSetsFlattened: DrawSet[];
 
-  constructor(bolt: Bolt, flattenHierarchy = false) {
+  constructor(flattenHierarchy = false) {
     // this._irradianceMap = environmentMaps.irradianceMap || undefined;
     // this._radianceMap = environmentMaps.radianceMap || undefined;
-
-    this._bolt = bolt;
     this._flattenHierarchy = flattenHierarchy;
     this._drawSetsFlattened = [];
   }

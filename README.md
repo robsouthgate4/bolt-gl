@@ -190,12 +190,21 @@ await loader.load('path/to/pointcloud.boltpc');
 const points = loader.points;
 ```
 
-### 🌍 Blender Scene Loader
+###  Blender Scene Loader
 
 ```javascript
-const BlenderSceneLoader = new BlenderSceneLoader();
-await BlenderSceneLoader.load('/models');
-const scene = BlenderSceneLoader;
+const loader = new BlenderSceneLoader();
+await loader.load('/models');
+const scene = loader;
+```
+
+### 🧱 GLTF Loader
+
+```javascript
+const loader = new GLTFLoader();
+const gltfNode = await loader.load(url);
+await loader.load('/models/scene.glb');
+const scene = gltfNode.scene;
 ```
 
 ## 📚 Documentation
