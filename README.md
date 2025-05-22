@@ -209,11 +209,8 @@ const scene = gltfNode.scene;
 
 ## 📚 Documentation
 
-For detailed documentation and examples, visit our [documentation site](link-to-docs).
+For detailed documentation and examples, visit our [documentation site](https://deepwiki.com/robsouthgate4/bolt-gl/1-introduction-to-bolt-gl).
 
-## 🤝 Contributing
-
-We welcome contributions! Please read our [contributing guidelines](link-to-contributing) before submitting pull requests.
 
 ## 📄 License
 
@@ -223,13 +220,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - Thanks to all contributors who have helped shape Bolt
 - Inspired by modern WebGL practices and patterns
-
-## 💬 Support
-
-For questions and support:
-- 🐛 [GitHub Issues](link-to-issues)
-- 💭 [Discord Community](link-to-discord)
-- 📖 [Documentation](link-to-docs)
 
 <!--[![NPM version][npm-image]][npm-url]
 [![Actions Status][ci-image]][ci-url]

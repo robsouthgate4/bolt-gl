@@ -18,6 +18,12 @@ export default {
       format: "cjs",
       sourcemap: true,
     },
+    {
+      file: "build/index.min.js",
+      format: "umd",
+      name: "BoltGL",
+      sourcemap: true,
+    }
   ],
   onwarn: (warning, warn) => {
     // Suppress sourcemap warnings about missing source files
@@ -40,15 +46,15 @@ export default {
       clean: true,
       useTsconfigDeclarationDir: true,
     }),
-    // terser({
-    //   compress: {
-    //     keep_fargs: true,
-    //   },
-    //   mangle: {
-    //     keep_classnames: true,
-    //     keep_fnames: true,
-    //   },
-    // }), // Minify for production
+    terser({
+      compress: {
+        keep_fargs: true,
+      },
+      mangle: {
+        keep_classnames: true,
+        keep_fnames: true,
+      },
+    }), // Minify for production
   ],
   treeshake: {
     moduleSideEffects: false,
