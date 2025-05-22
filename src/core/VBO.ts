@@ -6,9 +6,10 @@ export default class VBO {
   private _buffer: WebGLBuffer;
   private _drawType: number;
   private _id: string;
-
+  private _data: TypedArray | number;
   constructor(data: TypedArray | number, drawType = STATIC_DRAW, id = "") {
     this._gl = Bolt.getInstance().getContext();
+    this._data = data;
     this._buffer = <WebGLBuffer>this._gl.createBuffer();
     this._gl.bindBuffer(ARRAY_BUFFER, this._buffer);
     if (typeof data === "number") {
@@ -35,8 +36,19 @@ export default class VBO {
     this.unbind();
   }
 
+  getData(data: TypedArray, offset = 0) {
+    this.bind();
+    this._gl.getBufferSubData(ARRAY_BUFFER, offset, data);
+    this.unbind();
+    return data;
+  }
+
   delete() {
     this._gl.deleteBuffer(this._buffer);
+  }
+
+  public get data(): TypedArray {
+    return this._data as TypedArray;
   }
 
   public get buffer(): WebGLBuffer {

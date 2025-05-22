@@ -28,6 +28,8 @@ import {
   REPLACE,
   SRC_ALPHA,
   VERTEX_SHADER,
+  SEPARATE_ATTRIBS,
+  INTERLEAVED_ATTRIBS,
 } from "./Constants";
 import Bolt from "./Bolt";
 import Texture2D from "./Texture2D";
@@ -73,6 +75,9 @@ export default class Program {
     fragmentShaderSrc: string,
     parameters?: {
       transformFeedbackVaryings: string[];
+      transformFeedbackVaryingType:
+        | typeof SEPARATE_ATTRIBS
+        | typeof INTERLEAVED_ATTRIBS;
     }
   ) {
     ID++;
@@ -107,10 +112,11 @@ export default class Program {
 
     // add transform feedback varyings
     if (parameters?.transformFeedbackVaryings) {
+      console.log(parameters.transformFeedbackVaryingType);
       this._gl.transformFeedbackVaryings(
         this._program,
         parameters.transformFeedbackVaryings,
-        this._gl.SEPARATE_ATTRIBS
+        parameters.transformFeedbackVaryingType || SEPARATE_ATTRIBS
       );
     }
 
@@ -226,8 +232,6 @@ export default class Program {
         uniform.type === this._gl.SAMPLER_CUBE ||
         uniform.type === this._gl.SAMPLER_3D
       ) {
-        textureUnit++;
-
         const tempTexture = new Texture2D({
           width: 1,
           height: 1,
@@ -245,6 +249,8 @@ export default class Program {
 
         this.activate();
         this._gl.uniform1i(location, textureUnit);
+
+        textureUnit++;
       } else {
         this._uniforms[uniformName] = { location, value: undefined };
       }

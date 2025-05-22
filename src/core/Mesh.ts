@@ -119,7 +119,8 @@ export default class Mesh {
     layoutID: number | AttribPointer,
     type = FLOAT,
     offset = 0,
-    divisor: number | undefined = undefined
+    divisor: number | undefined = undefined,
+    stride: number | undefined = undefined
   ) {
     const buffer = vbo.buffer as TypedArray;
 
@@ -129,8 +130,8 @@ export default class Mesh {
       layoutID,
       size,
       type,
-      size * buffer.BYTES_PER_ELEMENT,
-      offset * buffer.BYTES_PER_ELEMENT,
+      stride || size,
+      offset,
       divisor
     );
 

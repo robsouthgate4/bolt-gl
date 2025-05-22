@@ -25,7 +25,7 @@ export default class DrawState {
     uniformTexture(uniform: string, texture: TextureCube | Texture2D): this;
     setAttribute(buffer: TypedArray, size: number, layoutID: number | AttribPointer, type: number, offset: number, divisor: number): this;
     setInstanceCount(count: number): this;
-    setVbo(vbo: VBO, size: number, layoutID: number | AttribPointer, type: number, offset: number, divisor: number): this;
+    setVbo(vbo: VBO, size: number, layoutID: number | AttribPointer, type: number, offset: number, divisor: number, stride?: number | undefined): this;
     setFbo(fbo: FBO): this;
     clear(r: number, g: number, b: number, a: number): this;
     setCullFace(face: number): this;

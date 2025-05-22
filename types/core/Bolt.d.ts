@@ -17,6 +17,7 @@ export default class Bolt {
     private _boundTexture;
     private _currentBlendFunction;
     private _currentCullFace;
+    private _afterDrawCallbacks;
     static getInstance(): Bolt;
     /**
      * Initialise a webgl context
@@ -93,10 +94,12 @@ export default class Bolt {
      * Trigger a depth sort of opaque and transparent nodes
      */
     forceDepthSort(): void;
+    onAfterDraw(cb: () => void): void;
+    private _endFrame;
     /**
      * @param  {Node} drawables
      */
-    draw(drawables: Node): void;
+    draw(drawables: Node, onBeforeDraw?: () => void, onAfterDraw?: () => void): void;
     get dpi(): number;
     set dpi(value: number);
     get viewport(): Viewport;

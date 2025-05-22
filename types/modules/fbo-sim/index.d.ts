@@ -32,5 +32,5 @@ export default class FBOSim {
     swapBuffers(fboSwapDefinition: FBOSwapDefinition): void;
     getTexture(passName: string): Texture2D | undefined;
     getProgram(passName: string): Program | undefined;
-    compute(): void;
+    compute(passName: string): void;
 }

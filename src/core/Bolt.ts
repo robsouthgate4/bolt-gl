@@ -36,6 +36,7 @@ export default class Bolt {
   private _boundTexture = -1;
   private _currentBlendFunction = { src: -1, dst: -1 };
   private _currentCullFace = BACK;
+  private _afterDrawCallbacks: (() => void)[] = [];
 
   static getInstance(): Bolt {
     if (!Bolt._instance) Bolt._instance = new Bolt();
@@ -275,10 +276,21 @@ export default class Bolt {
     this.sortByDepth(this._transparentNodes);
   }
 
+  public onAfterDraw(cb: () => void) {
+    this._afterDrawCallbacks.push(cb);
+  }
+
+  private _endFrame() {
+    for (const cb of this._afterDrawCallbacks) cb();
+    this._afterDrawCallbacks.length = 0;
+  }
+
   /**
    * @param  {Node} drawables
    */
-  draw(drawables: Node) {
+  draw(drawables: Node, onBeforeDraw?: () => void, onAfterDraw?: () => void) {
+    onBeforeDraw?.();
+
     this._camera.update();
 
     const render = (node: Node) => {
@@ -401,6 +413,9 @@ export default class Bolt {
         render(node);
       });
     }
+
+    onAfterDraw?.();
+    this._endFrame();
   }
 
   public get dpi(): number {

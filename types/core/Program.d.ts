@@ -2,6 +2,7 @@ import { mat2, mat3, mat4, vec2, vec3, vec4 } from "gl-matrix";
 import { BlendOptions, TextureObject, UniformObject } from "./Types";
 import TextureCube from "./TextureCube";
 import Texture from "./Texture";
+import { SEPARATE_ATTRIBS, INTERLEAVED_ATTRIBS } from "./Constants";
 export default class Program {
     private _vertexShader;
     private _fragmentShader;
@@ -21,6 +22,7 @@ export default class Program {
     protected _gl: WebGL2RenderingContext;
     constructor(vertexShaderSrc: string, fragmentShaderSrc: string, parameters?: {
         transformFeedbackVaryings: string[];
+        transformFeedbackVaryingType: typeof SEPARATE_ATTRIBS | typeof INTERLEAVED_ATTRIBS;
     });
     private applySettings;
     private shaderPreprocessor;

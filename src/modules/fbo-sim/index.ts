@@ -64,9 +64,7 @@ export default class FBOSim {
 
   private _runBlit(texture: Texture2D, fbo: FBO) {
     fbo.bind();
-    this._throughProgram.activate();
     this._throughProgram.setTexture("map", texture);
-    texture.bind(0);
     this._drawSetblit.program = this._throughProgram;
     this._bolt.clear(0, 0, 0, 0);
     this._bolt.draw(this._drawSetblit);
@@ -125,46 +123,64 @@ export default class FBOSim {
     }
   }
 
-  compute() {
-    const passes = this._FBOSwapDefinitions;
+  compute(passName: string) {
+    let passes = this._FBOSwapDefinitions;
+
+    if (passName) {
+      const pass = passes.find(
+        (fboSwapDefinition) => fboSwapDefinition.passName === passName
+      );
+
+      if (pass) {
+        passes = [pass];
+      } else {
+        console.warn("Pass not found");
+        return;
+      }
+    }
 
     passes.forEach((fboSwapDefinition) => {
-      const program = fboSwapDefinition.program;
+      this.swapBuffers(fboSwapDefinition);
 
-      fboSwapDefinition.write.bind();
+      const program = fboSwapDefinition.program;
+      const readTexture = fboSwapDefinition.read.targetTexture;
+      const writeFBO = fboSwapDefinition.write;
 
       if (program) {
-        program.activate();
-
         program.setVector2(
           "resolution",
-          vec2.fromValues(
-            fboSwapDefinition.read.width,
-            fboSwapDefinition.read.height
-          )
+          vec2.fromValues(readTexture.width, readTexture.height)
+        );
+        program.setTexture("map", readTexture);
+      }
+
+      if (
+        fboSwapDefinition.read.targetTexture.texture ===
+        fboSwapDefinition.write.targetTexture.texture
+      ) {
+        console.warn(
+          "Feedback loop risk: read and write textures are the same!"
         );
       }
+
+      writeFBO.bind(); // optional here if bind() reattaches, or remove this
 
       this._bolt.clear(0, 0, 0, 0);
 
       if (program) {
         this._drawSetblit.program = program;
+        this._bolt.draw(this._drawSetblit);
       }
 
-      this._bolt.draw(this._drawSetblit);
-
-      this.swapBuffers(fboSwapDefinition);
-      fboSwapDefinition.write.unbind();
+      writeFBO.unbind();
     });
 
     if (this._outputToScreen) {
       //console.log("output to screen");
       const pass1 = this._FBOSwapDefinitions[0];
-      this._bolt.setViewPort(0, 0, pass1.read.width * 10, pass1.read.height * 10);
+      this._outProgram.setTexture("map", pass1.write.targetTexture);
+      this._bolt.setViewPort(0, 0, pass1.read.width, pass1.read.height);
       this._bolt.clear(0, 0, 0, 1);
-      this._outProgram.activate();
-      this._outProgram.setTexture("map", pass1.read.targetTexture);
-      pass1.read.targetTexture.bind(0);
       this._bolt.draw(this._drawSetOut);
     }
   }

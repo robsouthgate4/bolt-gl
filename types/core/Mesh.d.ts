@@ -21,7 +21,7 @@ export default class Mesh {
     setDrawType(type: number): this;
     setLineWidth(width: number): this;
     setAttribute(buffer: TypedArray, size: number, layoutID: number | AttribPointer, type?: number, offset?: number, divisor?: number | undefined, drawType?: number): void;
-    setVBO(vbo: VBO, size: number, layoutID: number | AttribPointer, type?: number, offset?: number, divisor?: number | undefined): void;
+    setVBO(vbo: VBO, size: number, layoutID: number | AttribPointer, type?: number, offset?: number, divisor?: number | undefined, stride?: number | undefined): void;
     private linkDefaultBuffers;
     calculateBoxBounds(): void;
     /**

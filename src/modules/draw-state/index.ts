@@ -150,10 +150,19 @@ export default class DrawState {
     layoutID: number | AttribPointer,
     type: number,
     offset: number,
-    divisor: number
+    divisor: number,
+    stride: number | undefined = undefined
   ) {
     if (this._drawSet) {
-      this._drawSet.mesh.setVBO(vbo, size, layoutID, type, offset, divisor);
+      this._drawSet.mesh.setVBO(
+        vbo,
+        size,
+        layoutID,
+        type,
+        offset,
+        divisor,
+        stride
+      );
     } else {
       console.error("No draw set provided");
     }
