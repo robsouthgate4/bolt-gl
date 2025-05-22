@@ -29,6 +29,7 @@ import GLTFLoader, {
   Channel,
   KeyFrame,
 } from "./modules/loaders/gltf-loader";
+import KeyFrameAnimation from "./modules/keyframe-animation";
 import DrawState from "./modules/draw-state";
 import EventListeners from "./modules/event-listeners";
 import FBOSim, { FBOSwapDefinition } from "./modules/fbo-sim";
@@ -96,6 +97,7 @@ export {
   GLTFScene,
   Channel,
   KeyFrame,
+  KeyFrameAnimation,
   DrawState,
   EventListeners,
   FBOSim,
