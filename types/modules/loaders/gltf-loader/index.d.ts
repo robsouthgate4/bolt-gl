@@ -1,5 +1,5 @@
 import { mat4, quat, vec3 } from "gl-matrix";
-import { Bolt, DrawSet, Mesh, Node, Program, Texture2D, Transform } from "../../../index";
+import { DrawSet, Mesh, Node, Program, Texture2D, Transform } from "../../../index";
 import Skin from "./Skin";
 export declare type TypedArray = Int8ArrayConstructor | Uint8ArrayConstructor | Int16ArrayConstructor | Uint16ArrayConstructor | Int32ArrayConstructor | Uint32ArrayConstructor | Float32ArrayConstructor;
 export declare type GlTfId = number;
@@ -743,7 +743,7 @@ export default class GLTFLoader {
     private _json;
     private _flattenHierarchy;
     private _drawSetsFlattened;
-    constructor(bolt: Bolt, flattenHierarchy?: boolean);
+    constructor(flattenHierarchy?: boolean);
     load(url: string): Promise<Node>;
     _parseAnimations(animation: GLTFAnimation, json: GlTf, buffers: ArrayBufferLike[]): Channel;
     _parseSkin(gltf: GlTf, skin: GLTFSkin, buffers: ArrayBufferLike[]): Skin;

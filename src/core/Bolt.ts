@@ -465,4 +465,8 @@ export default class Bolt {
   public get gl() {
     return this._gl;
   }
+
+  public get activeCamera() {
+    return this._camera;
+  }
 }

@@ -112,4 +112,5 @@ export default class Bolt {
     get boundTexture(): number;
     set boundTexture(value: number);
     get gl(): WebGL2RenderingContext;
+    get activeCamera(): Camera;
 }

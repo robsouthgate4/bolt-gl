@@ -395,6 +395,20 @@ export default class Program {
         }
       }
     });
+
+    // pass in an any default uniforms here
+
+    if (this._bolt.activeCamera && this._uniforms["cameraPosition"]) {
+      this.setVector3("cameraPosition", this._bolt.activeCamera.position);
+    }
+
+    if (this._bolt.getContext() && this._uniforms["resolution"]) {
+      const canvas = this._bolt.getContext().canvas;
+      this.setVector2(
+        "resolution",
+        vec2.fromValues(canvas.width, canvas.height)
+      );
+    }
   }
 
   disable() {

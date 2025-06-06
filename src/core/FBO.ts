@@ -310,17 +310,18 @@ export default class FBO {
    * @param  {number} id
    */
   addAttachment(texture: Texture2D, id: number) {
+    const attachmentID = COLOR_ATTACHMENT0 + id;
     texture.bind();
     this._gl.bindFramebuffer(FRAMEBUFFER, this._frameBuffer);
     this._gl.framebufferTexture2D(
       FRAMEBUFFER,
-      id,
+      attachmentID,
       TEXTURE_2D,
       texture.texture,
       0
     );
     texture.unbind();
-    this._attachmentIds.push(id);
+    this._attachmentIds.push(attachmentID);
     this._attachmentTextures.push(texture);
   }
   /**
@@ -365,7 +366,6 @@ export default class FBO {
         this._width,
         this._height
       );
-      console.log("this._msaaDepthBuffer", this._msaaDepthBuffer);
       this._gl.bindRenderbuffer(RENDERBUFFER, null);
 
       this._gl.bindRenderbuffer(RENDERBUFFER, this._msaaColorRenderBuffer);
@@ -515,6 +515,10 @@ export default class FBO {
 
   public set attachments(value: number[]) {
     this._attachmentIds = value;
+  }
+
+  public get attachmentsTextures(): Texture2D[] {
+    return this._attachmentTextures;
   }
 
   public get depthTexture(): Texture2D | undefined {

@@ -72,6 +72,7 @@ export default class FBO {
     get frameBuffer(): WebGLFramebuffer;
     get attachments(): number[];
     set attachments(value: number[]);
+    get attachmentsTextures(): Texture2D[];
     get depthTexture(): Texture2D | undefined;
     get msaaDepthTexture(): Texture2D | undefined;
     get name(): string;
