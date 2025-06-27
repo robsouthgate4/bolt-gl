@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+//@ts-nocheck
 import { MeshoptDecoder } from "./MeshOptDecoder";
 
 interface SceneObject {
@@ -16,18 +18,23 @@ interface MeshData {
   normals: Float32Array;
   uvs: Float32Array | [];
   colors: Float32Array;
+}
+
+interface MeshDataIndices {
   indices: Uint16Array;
 }
 
 interface SceneDataObject {
   file: string;
   file_compressed?: string;
+  file_compressed_indices?: string;
   position: number[];
   rotation: number[];
   scale: number[];
   textures?: string[];
   materialColors?: number[];
   isInstanced?: boolean;
+  decode: Record<string, any>;
 }
 
 export default class BlenderSceneLoader {
@@ -51,25 +58,29 @@ export default class BlenderSceneLoader {
 
     for (const object of objects) {
       const {
-        file,
         file_compressed,
+        file_compressed_indices,
         position,
         rotation,
         scale,
         textures,
         materialColors,
         isInstanced,
+        decode,
       } = sceneData[object];
 
-      let meshData: MeshData;
+      const data = await this.loadCompressedBinary(
+        `${this.path}/${file_compressed}`,
+        `${this.path}/${file_compressed_indices}`,
+        decode
+      );
 
-      if (this.meshOptimize) {
-        meshData = await this.loadCompressedBinary(
-          `${this.path}/${file_compressed}`
-        );
-      } else {
-        meshData = await this.loadCompressedBinary(`${this.path}/${file}`);
-      }
+      const meshData = {
+        ...data.vertexData,
+        indices: data.indicesData.indices,
+      };
+
+      console.log(meshData);
 
       this.objects.push({
         name: object,
@@ -84,99 +95,91 @@ export default class BlenderSceneLoader {
     }
   }
 
-  private async loadCompressedBinary(url: string): Promise<MeshData> {
-    const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}`);
+  private async loadCompressedBinary(
+    urlVertex: string,
+    urlIndices: string,
+    decode: Record<string, any>
+  ): Promise<MeshData> {
+    const responseVertex = await fetch(urlVertex);
+    const responseIndices = await fetch(urlIndices);
+
+    if (!responseVertex.ok || !responseIndices.ok) {
+      throw new Error(`HTTP error! Status: ${responseVertex.status}`);
     }
 
-    const buffer = await response.arrayBuffer();
-    const compressedData = new Uint8Array(buffer);
+    const bufferVertex = await responseVertex.arrayBuffer();
+    const bufferIndices = await responseIndices.arrayBuffer();
 
-    if (this.meshOptimize) {
-      await MeshoptDecoder.ready;
-      return this.parseBinaryOptimized(compressedData.buffer);
-    }
+    const compressedDataVertex = new Uint8Array(bufferVertex);
+    const compressedDataIndices = new Uint8Array(bufferIndices);
 
-    return this.parseBinary(compressedData.buffer);
+    await MeshoptDecoder.ready;
+
+    const vertexData = this.decodeVertexBuffer(compressedDataVertex, decode);
+    const indicesData = this.decodeIndicesBuffer(compressedDataIndices, decode);
+
+    return { vertexData, indicesData };
   }
 
-  private parseBinary(buffer: ArrayBuffer): MeshData {
-    const dataView = new DataView(buffer);
-    let offset = 0;
+  private decodeIndicesBuffer(
+    buffer: ArrayBuffer,
+    decode: Record<string, any>
+  ): MeshDataIndices {
+    const { indexCount } = decode;
 
-    const numVertices = dataView.getUint32(offset, true);
-    offset += 4;
-    const numFaces = dataView.getUint32(offset, true);
-    offset += 4;
+    // Use correct stride for Uint16
+    const stride = 2;
 
-    if (numVertices <= 0 || numFaces <= 0) {
-      throw new Error("Invalid mesh data: zero or negative vertices or faces.");
-    }
-    if (buffer.byteLength < offset) {
-      throw new Error("Invalid buffer size: insufficient data for header.");
-    }
+    // Create typed array for decoded output
+    const decoded = new Uint16Array(indexCount);
 
-    const positions = new Float32Array(buffer, offset, numVertices * 3);
-    offset += numVertices * 3 * 4;
+    // Decode compressed buffer into this output
+    MeshoptDecoder.decodeIndexBuffer!(
+      new Uint8Array(decoded.buffer),
+      indexCount,
+      stride,
+      new Uint8Array(buffer)
+    );
 
-    const normals = new Float32Array(buffer, offset, numVertices * 3);
-    offset += numVertices * 3 * 4;
-
-    const hasUVs = buffer.byteLength > offset + numFaces * 3 * 4;
-    const uvs = hasUVs ? new Float32Array(buffer, offset, numVertices * 2) : [];
-    if (hasUVs) offset += numVertices * 2 * 4;
-
-    const colors = new Float32Array(buffer, offset, numVertices * 4);
-    offset += numVertices * 4 * 4;
-
-    const indices = new Uint16Array(buffer, offset, numFaces * 3);
-
-    return { positions, normals, uvs: uvs as Float32Array, colors, indices };
+    return { indices: decoded };
   }
 
-  private parseBinaryOptimized(buffer: ArrayBuffer): MeshData {
-    console.log(MeshoptDecoder);
+  private decodeVertexBuffer(
+    buffer: ArrayBuffer,
+    decode: Record<string, any>
+  ): MeshData {
+    console.log(buffer);
 
     const stride = 48;
 
+    const { vertexCount } = decode;
+
+    const decoded = new Uint8Array(vertexCount * stride);
+
+    MeshoptDecoder.decodeVertexBuffer!(decoded, vertexCount, stride, buffer);
+
+    // Now interpret as floats:
+    const decodedFloats = new Float32Array(decoded.buffer);
+
+    // You can now slice out attributes:
+    const positions = new Float32Array(vertexCount * 3);
+    const normals = new Float32Array(vertexCount * 3);
+    const uvs = new Float32Array(vertexCount * 2);
+    const colors = new Float32Array(vertexCount * 4);
+
+    for (let i = 0; i < vertexCount; i++) {
+      const base = i * (stride / 4); // stride in floats
+      positions.set(decodedFloats.slice(base, base + 3), i * 3);
+      normals.set(decodedFloats.slice(base + 3, base + 6), i * 3);
+      uvs.set(decodedFloats.slice(base + 6, base + 8), i * 2);
+      colors.set(decodedFloats.slice(base + 8, base + 12), i * 4);
+    }
+
     return {
-      positions: new Float32Array(),
-      normals: new Float32Array(),
-      uvs: new Float32Array(),
-      colors: new Float32Array(),
-      indices: new Uint16Array(),
+      positions,
+      normals,
+      uvs,
+      colors,
     };
-    // const dataView = new DataView(buffer);
-    // let offset = 0;
-
-    // const numVertices = dataView.getUint32(offset, true);
-    // offset += 4;
-    // const numFaces = dataView.getUint32(offset, true);
-    // offset += 4;
-
-    // if (numVertices <= 0 || numFaces <= 0) {
-    //   throw new Error("Invalid mesh data: zero or negative vertices or faces.");
-    // }
-    // if (buffer.byteLength < offset) {
-    //   throw new Error("Invalid buffer size: insufficient data for header.");
-    // }
-
-    // const positions = new Float32Array(buffer, offset, numVertices * 3);
-    // offset += numVertices * 3 * 4;
-
-    // const normals = new Float32Array(buffer, offset, numVertices * 3);
-    // offset += numVertices * 3 * 4;
-
-    // const hasUVs = buffer.byteLength > offset + numFaces * 3 * 4;
-    // const uvs = hasUVs ? new Float32Array(buffer, offset, numVertices * 2) : [];
-    // if (hasUVs) offset += numVertices * 2 * 4;
-
-    // const colors = new Float32Array(buffer, offset, numVertices * 4);
-    // offset += numVertices * 4 * 4;
-
-    // const indices = new Uint16Array(buffer, offset, numFaces * 3);
-
-    // return { positions, normals, uvs: uvs as Float32Array, colors, indices };
   }
 }

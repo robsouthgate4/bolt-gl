@@ -7,6 +7,6 @@ export default class BlenderSceneLoader {
     load(path: string): Promise<void>;
     private loadScene;
     private loadCompressedBinary;
-    private parseBinary;
-    private parseBinaryOptimized;
+    private decodeIndicesBuffer;
+    private decodeVertexBuffer;
 }
