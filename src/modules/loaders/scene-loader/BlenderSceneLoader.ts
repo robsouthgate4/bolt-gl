@@ -80,8 +80,6 @@ export default class BlenderSceneLoader {
         indices: data.indicesData.indices,
       };
 
-      console.log(meshData);
-
       this.objects.push({
         name: object,
         position,
@@ -148,11 +146,7 @@ export default class BlenderSceneLoader {
     buffer: ArrayBuffer,
     decode: Record<string, any>
   ): MeshData {
-    console.log(buffer);
-
-    const stride = 48;
-
-    const { vertexCount } = decode;
+    const { vertexCount, stride } = decode;
 
     const decoded = new Uint8Array(vertexCount * stride);
 
