@@ -117,6 +117,7 @@ export default abstract class Texture {
   }
 
   protected applySettings() {
+    this.bind();
     if (this._generateMipmaps) {
       this._gl.generateMipmap(this._target);
     }
@@ -130,6 +131,8 @@ export default abstract class Texture {
     if (this._anistropy > 0) {
       this.setAnistropy();
     }
+
+    this.unbind();
   }
 
   private setAnistropy() {

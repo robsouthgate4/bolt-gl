@@ -35,6 +35,7 @@ export default class Plane {
     const v = 1;
     const w = 2;
 
+    // 1. Generate all vertices
     for (let iy = 0; iy < gridY1; iy++) {
       const y = iy * sh - heightHalf;
 
@@ -51,30 +52,25 @@ export default class Plane {
         vector[v] = 0;
         vector[w] = depth > 0 ? 1 : -1;
 
-        // now apply vector to normal buffer
-
         this.normals.push(vector[0], vector[1], vector[2]);
-
-        // uvs
 
         this.uvs.push(ix / widthSegments);
         this.uvs.push(1 - iy / heightSegments);
 
-        // counters
-
         vertexCounter += 1;
       }
+    }
 
-      for (let iy = 0; iy < heightSegments; iy++) {
-        for (let ix = 0; ix < widthSegments; ix++) {
-          const a = ix + gridX1 * iy;
-          const b = ix + gridX1 * (iy + 1);
-          const c = ix + 1 + gridX1 * (iy + 1);
-          const d = ix + 1 + gridX1 * iy;
+    // ✅ 2. Generate indices AFTER all vertices
+    for (let iy = 0; iy < heightSegments; iy++) {
+      for (let ix = 0; ix < widthSegments; ix++) {
+        const a = ix + gridX1 * iy;
+        const b = ix + gridX1 * (iy + 1);
+        const c = ix + 1 + gridX1 * (iy + 1);
+        const d = ix + 1 + gridX1 * iy;
 
-          this.indices.push(a, b, d);
-          this.indices.push(b, c, d);
-        }
+        this.indices.push(a, b, d);
+        this.indices.push(b, c, d);
       }
     }
   }
