@@ -89,20 +89,15 @@ export default class TextureCube extends Texture {
         null
       );
     }
-
-    this.unbind();
-
-    this.applySettings();
   }
 
   load() {
-    this.bind();
-
     const loadImage = (source: string, type: number) => {
       return new Promise((resolve, reject) => {
         const image = new Image();
 
         image.addEventListener("load", () => {
+          this.bind();
           this.gl.texImage2D(
             type,
             0,
@@ -114,6 +109,10 @@ export default class TextureCube extends Texture {
 
           this._width = image.width;
           this._height = image.height;
+
+          this.applySettings();
+
+          this.unbind();
 
           resolve(image);
         });
@@ -169,8 +168,6 @@ export default class TextureCube extends Texture {
       this._type,
       null
     );
-
-    this.unbind();
   }
 
   setFromData(
