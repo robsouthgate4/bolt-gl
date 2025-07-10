@@ -67,11 +67,15 @@ export default class TextureCube extends Texture {
       imagePath,
     });
 
+    this.init();
+
     this._files = files;
   }
 
   init() {
     this._texture = <WebGLTexture>this._gl.createTexture();
+
+    console.log("init", this._texture);
 
     this.bind();
 
@@ -89,6 +93,8 @@ export default class TextureCube extends Texture {
         null
       );
     }
+
+    this.unbind();
   }
 
   load() {
@@ -98,6 +104,8 @@ export default class TextureCube extends Texture {
 
         image.addEventListener("load", () => {
           this.bind();
+          console.log("type", type);
+          console.log("this._format", this._format);
           this.gl.texImage2D(
             type,
             0,
@@ -111,8 +119,6 @@ export default class TextureCube extends Texture {
           this._height = image.height;
 
           this.applySettings();
-
-          this.unbind();
 
           resolve(image);
         });
@@ -142,11 +148,9 @@ export default class TextureCube extends Texture {
 
     return Promise.all(toLoad)
       .then(() => {
-        if (this.generateMipmaps) {
-          this.gl.generateMipmap(this.gl.TEXTURE_CUBE_MAP);
-        }
-
-        this.unbind();
+        // if (this.generateMipmaps) {
+        //   this.gl.generateMipmap(this.gl.TEXTURE_CUBE_MAP);
+        // }
       })
       .catch((reason) => {
         console.log(reason);
@@ -168,6 +172,8 @@ export default class TextureCube extends Texture {
       this._type,
       null
     );
+
+    this.unbind();
   }
 
   setFromData(
