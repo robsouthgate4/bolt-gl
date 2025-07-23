@@ -10,6 +10,10 @@ import {
   TEXTURE_CUBE_MAP_POSITIVE_X,
   TEXTURE_CUBE_MAP_POSITIVE_Y,
   TEXTURE_CUBE_MAP_POSITIVE_Z,
+  TEXTURE_MAG_FILTER,
+  TEXTURE_MIN_FILTER,
+  TEXTURE_WRAP_S,
+  TEXTURE_WRAP_T,
   UNSIGNED_BYTE,
 } from "./Constants";
 
@@ -20,6 +24,15 @@ interface FileParams {
 interface MapParams {
   [key: string]: number;
 }
+
+const map: MapParams = {
+  px: TEXTURE_CUBE_MAP_POSITIVE_X,
+  nx: TEXTURE_CUBE_MAP_NEGATIVE_X,
+  py: TEXTURE_CUBE_MAP_POSITIVE_Y,
+  ny: TEXTURE_CUBE_MAP_NEGATIVE_Y,
+  pz: TEXTURE_CUBE_MAP_POSITIVE_Z,
+  nz: TEXTURE_CUBE_MAP_NEGATIVE_Z,
+};
 
 /**
  * Cube textures, extends from core Texture class
@@ -67,6 +80,8 @@ export default class TextureCube extends Texture {
       imagePath,
     });
 
+    this._flipY = false;
+
     this.init();
 
     this._files = files;
@@ -74,9 +89,6 @@ export default class TextureCube extends Texture {
 
   init() {
     this._texture = <WebGLTexture>this._gl.createTexture();
-
-    console.log("init", this._texture);
-
     this.bind();
 
     // generate textures for each face of cube map
@@ -98,29 +110,18 @@ export default class TextureCube extends Texture {
   }
 
   load() {
-    const loadImage = (source: string, type: number) => {
+    const promises = [];
+
+    const loadImage = (source: string, type: number, key: string) => {
       return new Promise((resolve, reject) => {
         const image = new Image();
 
         image.addEventListener("load", () => {
-          this.bind();
-          console.log("type", type);
-          console.log("this._format", this._format);
-          this.gl.texImage2D(
+          resolve({
+            image,
             type,
-            0,
-            this._format,
-            this._format,
-            this._pixelType,
-            image
-          );
-
-          this._width = image.width;
-          this._height = image.height;
-
-          this.applySettings();
-
-          resolve(image);
+            key,
+          });
         });
 
         image.addEventListener("error", (ev) => {
@@ -131,31 +132,33 @@ export default class TextureCube extends Texture {
       });
     };
 
-    const map: MapParams = {
-      px: TEXTURE_CUBE_MAP_POSITIVE_X,
-      nx: TEXTURE_CUBE_MAP_NEGATIVE_X,
-      py: TEXTURE_CUBE_MAP_POSITIVE_Y,
-      ny: TEXTURE_CUBE_MAP_NEGATIVE_Y,
-      pz: TEXTURE_CUBE_MAP_POSITIVE_Z,
-      nz: TEXTURE_CUBE_MAP_NEGATIVE_Z,
-    };
-
-    const toLoad = Object.keys(this._files).map((key: string) => {
-      const type = map[key];
+    for (const key in this._files) {
       const file = this.imagePath + this._files[key as keyof FileParams];
-      return loadImage(file, type);
-    });
+      const promise = loadImage(file, map[key], key);
+      promises.push(promise);
+    }
 
-    return Promise.all(toLoad)
-      .then(() => {
-        // if (this.generateMipmaps) {
-        //   this.gl.generateMipmap(this.gl.TEXTURE_CUBE_MAP);
-        // }
-      })
-      .catch((reason) => {
-        console.log(reason);
-        this.unbind();
+    return Promise.all(promises).then((results) => {
+      results.forEach((result: any) => {
+        this.bind();
+        this.applySettings(false);
+        this.gl.texImage2D(
+          result.type,
+          0,
+          this._format,
+          this._format,
+          this._pixelType,
+          result.image
+        );
+        this._width = result.image.width;
+        this._height = result.image.height;
       });
+
+      if (this._generateMipmaps) {
+        this._gl.generateMipmap(this._target);
+      }
+      this.unbind();
+    });
   }
 
   resize(width: number, height: number) {
@@ -183,9 +186,9 @@ export default class TextureCube extends Texture {
   ) {
     // TODO: allow setting data for each face of cube map
 
-    this.bind();
-
     for (let i = 0; i < 6; i++) {
+      this.bind();
+      this.applySettings(false);
       this.gl.texImage2D(
         this.gl.TEXTURE_CUBE_MAP_POSITIVE_X + i,
         0,
@@ -197,9 +200,11 @@ export default class TextureCube extends Texture {
         this._type,
         data
       );
+      if (this._generateMipmaps) {
+        this._gl.generateMipmap(this._target);
+      }
+      this.unbind();
     }
-
-    this.unbind();
   }
 
   public get files(): FileParams {

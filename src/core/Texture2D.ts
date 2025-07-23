@@ -67,6 +67,10 @@ export default class Texture2D extends Texture {
     );
 
     this.applySettings();
+
+    if (this._generateMipmaps) {
+      this._gl.generateMipmap(this._target);
+    }
   }
 
   resize(width: number, height: number) {
@@ -135,6 +139,10 @@ export default class Texture2D extends Texture {
     );
 
     this.applySettings();
+
+    if (this._generateMipmaps) {
+      this._gl.generateMipmap(this._target);
+    }
   }
 
   load() {
@@ -159,6 +167,10 @@ export default class Texture2D extends Texture {
         );
 
         this.applySettings();
+
+        if (this._generateMipmaps) {
+          this._gl.generateMipmap(this._target);
+        }
 
         resolve(image);
 

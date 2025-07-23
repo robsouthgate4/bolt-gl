@@ -34,6 +34,7 @@ export default class Bolt {
   private _activeProgram = -1;
   private _activeTextureUnit = -1;
   private _boundTexture = -1;
+  private _boundTarget = -1;
   private _currentBlendFunction = { src: -1, dst: -1 };
   private _currentCullFace = BACK;
   private _afterDrawCallbacks: (() => void)[] = [];
@@ -460,6 +461,14 @@ export default class Bolt {
 
   public set boundTexture(value) {
     this._boundTexture = value;
+  }
+
+  public get boundTarget() {
+    return this._boundTarget;
+  }
+
+  public set boundTarget(value) {
+    this._boundTarget = value;
   }
 
   public get gl() {

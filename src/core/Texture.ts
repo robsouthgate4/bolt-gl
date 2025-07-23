@@ -116,12 +116,13 @@ export default abstract class Texture {
     return (value & (value - 1)) == 0;
   }
 
-  protected applySettings() {
-    if (this._generateMipmaps) {
-      this._gl.generateMipmap(this._target);
+  protected applySettings(flipY?: boolean) {
+    if (flipY !== undefined) {
+      this._gl.pixelStorei(this._gl.UNPACK_FLIP_Y_WEBGL, flipY);
+    } else {
+      this._gl.pixelStorei(this._gl.UNPACK_FLIP_Y_WEBGL, this._flipY);
     }
 
-    this._gl.pixelStorei(this._gl.UNPACK_FLIP_Y_WEBGL, this._flipY);
     this._gl.texParameteri(this._target, TEXTURE_WRAP_S, this._wrapS);
     this._gl.texParameteri(this._target, TEXTURE_WRAP_T, this._wrapT);
     this._gl.texParameteri(this._target, TEXTURE_MIN_FILTER, this._minFilter);
@@ -132,7 +133,7 @@ export default abstract class Texture {
     }
   }
 
-  private setAnistropy() {
+  protected setAnistropy() {
     const ext =
       this._gl.getExtension("EXT_texture_filter_anisotropic") ||
       this._gl.getExtension("MOZ_EXT_texture_filter_anisotropic") ||

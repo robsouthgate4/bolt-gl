@@ -48,8 +48,8 @@ export default abstract class Texture {
     unbind(): void;
     delete(): void;
     isPowerOf2(value: number): boolean;
-    protected applySettings(): void;
-    private setAnistropy;
+    protected applySettings(flipY?: boolean): void;
+    protected setAnistropy(): void;
     get texture(): WebGLTexture;
     get minFilter(): number;
     set minFilter(value: number);

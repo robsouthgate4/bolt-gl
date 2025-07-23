@@ -15,6 +15,7 @@ export default class Bolt {
     private _activeProgram;
     private _activeTextureUnit;
     private _boundTexture;
+    private _boundTarget;
     private _currentBlendFunction;
     private _currentCullFace;
     private _afterDrawCallbacks;
@@ -111,6 +112,8 @@ export default class Bolt {
     set activeTextureUnit(value: number);
     get boundTexture(): number;
     set boundTexture(value: number);
+    get boundTarget(): number;
+    set boundTarget(value: number);
     get gl(): WebGL2RenderingContext;
     get activeCamera(): Camera;
 }
