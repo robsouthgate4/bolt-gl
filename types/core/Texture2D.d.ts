@@ -23,6 +23,8 @@ export default class Texture2D extends Texture {
     init(): void;
     resize(width: number, height: number): void;
     setFromData(data: TypedArray, width: number, height: number): void;
+    forceGenerateMipmaps(): void;
     load(): Promise<unknown>;
     get image(): HTMLImageElement | undefined;
+    get data(): TypedArray | undefined;
 }

@@ -4,6 +4,7 @@ import VAO from "./core/VAO";
 import Transform from "./core/Transform";
 import TextureCube from "./core/TextureCube";
 import Texture2D from "./core/Texture2D";
+import Texture2DArray from "./core/Texture2DArray";
 import TextureSampler from "./core/TextureSampler";
 import Texture from "./core/Texture";
 import RBO from "./core/RBO";
@@ -56,4 +57,4 @@ import BlenderSceneLoader from "./modules/loaders/scene-loader/BlenderSceneLoade
 export * from "./core/GLUtils";
 export * from "./core/Constants";
 export * from "./core/Types";
-export { Mesh, SkinMesh, InstancedMesh, Camera, CameraPersp, CameraOrtho, FBO, Node, DrawSet, RBO, Program, Texture, Texture2D, TextureSampler, TextureCube, Transform, VAO, VBO, IBO, VBOInstanced, AssetCache, AssetType, Clock, DracoDecoder, DracoLoader, GLTFLoader, PointCloudLoader, BlenderSceneLoader, GLTFScene, Channel, KeyFrame, KeyFrameAnimation, DrawState, EventListeners, FBOSim, FBOSwapDefinition, TransformFeedback, GPUPicker, parseHdr, Orbit, Post, ShaderPass, FastBlurPass, Pass, AxisAlignedBox, Ray, Raycast, Cube, Floor, Plane, Sphere, Bolt, GL_RESIZE_TOPIC, GL_TOUCH_END_TOPIC, GL_TOUCH_MOVE_TOPIC, GL_TOUCH_START_TOPIC, GL_TOUCH_HOLD_TOPIC, GL_WHEEL_TOPIC, GL_KEYDOWN_TOPIC, GL_KEYUP_TOPIC, };
+export { Mesh, SkinMesh, InstancedMesh, Camera, CameraPersp, CameraOrtho, FBO, Node, DrawSet, RBO, Program, Texture, Texture2D, Texture2DArray, TextureSampler, TextureCube, Transform, VAO, VBO, IBO, VBOInstanced, AssetCache, AssetType, Clock, DracoDecoder, DracoLoader, GLTFLoader, PointCloudLoader, BlenderSceneLoader, GLTFScene, Channel, KeyFrame, KeyFrameAnimation, DrawState, EventListeners, FBOSim, FBOSwapDefinition, TransformFeedback, GPUPicker, parseHdr, Orbit, Post, ShaderPass, FastBlurPass, Pass, AxisAlignedBox, Ray, Raycast, Cube, Floor, Plane, Sphere, Bolt, GL_RESIZE_TOPIC, GL_TOUCH_END_TOPIC, GL_TOUCH_MOVE_TOPIC, GL_TOUCH_START_TOPIC, GL_TOUCH_HOLD_TOPIC, GL_WHEEL_TOPIC, GL_KEYDOWN_TOPIC, GL_KEYUP_TOPIC, };

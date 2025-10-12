@@ -62,7 +62,7 @@ export default class FBOSim {
     this._drawSetOut = new DrawSet(this._triangleMesh, this._outProgram);
   }
 
-  private _runBlit(texture: Texture2D, fbo: FBO) {
+  public runBlit(texture: Texture2D, fbo: FBO) {
     fbo.bind();
     this._throughProgram.setTexture("map", texture);
     this._drawSetblit.program = this._throughProgram;
@@ -81,11 +81,8 @@ export default class FBOSim {
     this._FBOSwapDefinitions.forEach((fboSwapDefinition) => {
       // blit the initial texture to the read and write fbos
       if (fboSwapDefinition.initialTexture) {
-        this._runBlit(fboSwapDefinition.initialTexture, fboSwapDefinition.read);
-        this._runBlit(
-          fboSwapDefinition.initialTexture,
-          fboSwapDefinition.write
-        );
+        this.runBlit(fboSwapDefinition.initialTexture, fboSwapDefinition.read);
+        this.runBlit(fboSwapDefinition.initialTexture, fboSwapDefinition.write);
       }
 
       fboSwapDefinition.program = new Program(
@@ -101,6 +98,14 @@ export default class FBOSim {
     const temp = fboSwapDefinition.read;
     fboSwapDefinition.read = fboSwapDefinition.write;
     fboSwapDefinition.write = temp;
+  }
+
+  getFBO(passName: string) {
+    const pass = this._FBOSwapDefinitions.find(
+      (fboSwapDefinition) => fboSwapDefinition.passName === passName
+    );
+
+    return pass?.read;
   }
 
   getTexture(passName: string) {
@@ -177,7 +182,7 @@ export default class FBOSim {
 
     if (this._outputToScreen) {
       //console.log("output to screen");
-      const pass1 = this._FBOSwapDefinitions[0];
+      const pass1 = this._FBOSwapDefinitions[1];
       this._outProgram.setTexture("map", pass1.write.targetTexture);
       this._bolt.setViewPort(0, 0, pass1.read.width, pass1.read.height);
       this._bolt.clear(0, 0, 0, 1);

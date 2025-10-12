@@ -33,6 +33,7 @@ import {
 } from "./Constants";
 import Bolt from "./Bolt";
 import Texture2D from "./Texture2D";
+import Texture2DArray from "./Texture2DArray";
 
 let ID = -1;
 
@@ -367,6 +368,14 @@ export default class Program {
     texture.currentUnit = unit || 0;
     this._gl.uniform1i(location, unit || 0);
     this._uniforms[uniform] = { location, value: texture, textureUnit: unit };
+  }
+
+  setTextureArray(uniform: string, texture: Texture2DArray) {
+    this.activate();
+    const location = this.getLocation(uniform);
+    if (!location) return;
+    this._gl.uniform1i(location, texture.currentUnit);
+    this._uniforms[uniform] = { location, value: texture, textureUnit: texture.currentUnit };
   }
 
   private getLocation(uniform: string) {

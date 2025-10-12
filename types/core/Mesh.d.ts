@@ -3,6 +3,7 @@ import VAO from "./VAO";
 import { AttribPointer, BoxBounds, Face, GeometryBuffers, MeshParams, TypedArray } from "./Types";
 import Program from "./Program";
 import Node from "./Node";
+import DrawSet from "./DrawSet";
 export default class Mesh {
     private _gl;
     private _defaultBuffers;
@@ -17,6 +18,7 @@ export default class Mesh {
     private _lineWidth?;
     private _depthWrite;
     private _depthTest;
+    private _drawSet?;
     constructor(geometry?: GeometryBuffers, params?: MeshParams);
     setDrawType(type: number): this;
     setLineWidth(width: number): this;
@@ -60,4 +62,6 @@ export default class Mesh {
     protected get lineWidth(): number | undefined;
     get instanced(): boolean;
     set instanced(value: boolean);
+    set drawSet(value: DrawSet | undefined);
+    get drawSet(): DrawSet | undefined;
 }

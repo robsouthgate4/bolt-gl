@@ -4,6 +4,7 @@ import VAO from "./core/VAO";
 import Transform from "./core/Transform";
 import TextureCube from "./core/TextureCube";
 import Texture2D from "./core/Texture2D";
+import Texture2DArray from "./core/Texture2DArray";
 import TextureSampler from "./core/TextureSampler";
 import Texture from "./core/Texture";
 import RBO from "./core/RBO";
@@ -79,6 +80,7 @@ export {
   Program,
   Texture,
   Texture2D,
+  Texture2DArray,
   TextureSampler,
   TextureCube,
   Transform,

@@ -126,23 +126,28 @@ export default class Texture2D extends Texture {
 
     this.bind();
 
-    this._gl.texSubImage2D(
+    this._gl.texImage2D(
       TEXTURE_2D,
       0,
-      0,
-      0,
+      this._internalFormat,
       this.width,
       this.height,
+      0,
       this._format,
       this._type,
       data
     );
 
-    this.applySettings();
-
     if (this._generateMipmaps) {
       this._gl.generateMipmap(this._target);
     }
+  }
+
+  public forceGenerateMipmaps() {
+    this.bind();
+    this._generateMipmaps = true;
+    this._gl.generateMipmap(this._target);
+    this.unbind();
   }
 
   load() {
@@ -187,5 +192,9 @@ export default class Texture2D extends Texture {
 
   public get image(): HTMLImageElement | undefined {
     return this._image;
+  }
+
+  public get data(): TypedArray | undefined {
+    return this._data;
   }
 }

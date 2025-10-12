@@ -14,6 +14,7 @@ import Node from "./Node";
 import IBO from "./IBO";
 import { FLOAT, TRIANGLES, UNSIGNED_SHORT, STATIC_DRAW } from "./Constants";
 import Bolt from "./Bolt";
+import DrawSet from "./DrawSet";
 
 export default class Mesh {
   private _gl: WebGL2RenderingContext;
@@ -39,6 +40,7 @@ export default class Mesh {
   private _lineWidth?: number;
   private _depthWrite = true;
   private _depthTest = true;
+  private _drawSet?: DrawSet;
   constructor(geometry?: GeometryBuffers, params?: MeshParams) {
     this._gl = Bolt.getInstance().getContext();
 
@@ -271,6 +273,7 @@ export default class Mesh {
   public get bounds(): BoxBounds {
     return this._bounds;
   }
+
   public set bounds(value: BoxBounds) {
     this._bounds = value;
   }
@@ -365,5 +368,13 @@ export default class Mesh {
 
   public set instanced(value: boolean) {
     this._instanced = value;
+  }
+
+  public set drawSet(value: DrawSet | undefined) {
+    this._drawSet = value;
+  }
+
+  public get drawSet(): DrawSet | undefined {
+    return this._drawSet;
   }
 }

@@ -3,6 +3,7 @@ import { BlendOptions, TextureObject, UniformObject } from "./Types";
 import TextureCube from "./TextureCube";
 import Texture from "./Texture";
 import { SEPARATE_ATTRIBS, INTERLEAVED_ATTRIBS } from "./Constants";
+import Texture2DArray from "./Texture2DArray";
 export default class Program {
     private _vertexShader;
     private _fragmentShader;
@@ -38,6 +39,7 @@ export default class Program {
     setMatrix3(uniform: string, value: mat3): void;
     setMatrix4(uniform: string, value: mat4): void;
     setTexture(uniform: string, texture: Texture | TextureCube): void;
+    setTextureArray(uniform: string, texture: Texture2DArray): void;
     private getLocation;
     activate(): void;
     use(): void;

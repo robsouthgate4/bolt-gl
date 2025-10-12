@@ -15,6 +15,7 @@ export default class DrawSet extends Node {
     super();
     this._mesh = mesh;
     this._program = program;
+    this._mesh.drawSet = this;
   }
 
   public get program(): Program {

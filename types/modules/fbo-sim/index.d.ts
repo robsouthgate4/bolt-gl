@@ -23,13 +23,14 @@ export default class FBOSim {
     private _throughProgram;
     private _isIos;
     constructor(bolt: Bolt, outPutToScreen?: boolean);
-    private _runBlit;
+    runBlit(texture: Texture2D, fbo: FBO): void;
     /**
      * bind fbos that require swappoing at run time
      * @param  {FBOSwapDefinition[]} fboDefinitions - array of FBO definitions
      */
     bindFBOs(fboDefinitions: FBOSwapDefinition[]): void;
     swapBuffers(fboSwapDefinition: FBOSwapDefinition): void;
+    getFBO(passName: string): FBO | undefined;
     getTexture(passName: string): Texture2D | undefined;
     getProgram(passName: string): Program | undefined;
     compute(passName: string): void;
